@@ -1,0 +1,1427 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Parkinson's Care Continuity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: sticky role switcher, demo-clock strip, per-role tab bar, then one view at a time. Teal clinical palette carried over from the original monitor. */
+:root{
+  --bg:#EEF3F4; --surface:#FFFFFF; --surface-2:#E5ECEE; --ink:#10272C; --ink-2:#4A6369; --line:#CBD8DB; --grid:#DDE7E9;
+  --accent:#0B7A85; --accent-ink:#FFFFFF; --accent-soft:#D2ECEE;
+  --ok:#1B7F52; --ok-soft:#D6EFE2; --warn:#A85F00; --warn-soft:#FAEACB; --crit:#C42B2B; --crit-soft:#FADADA;
+  --oled-bg:#04090B; --oled-fg:#8FE6EE;
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,-apple-system,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0A1417; --surface:#111F23; --surface-2:#182A2F; --ink:#E4EFF1; --ink-2:#93ACB2; --line:#26393E; --grid:#1D2F34;
+    --accent:#4DC4CF; --accent-ink:#06191C; --accent-soft:#12383D;
+    --ok:#4CCB8E; --ok-soft:#123226; --warn:#F0B040; --warn-soft:#3A2B0E; --crit:#FF6B6B; --crit-soft:#3E1717;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0A1417; --surface:#111F23; --surface-2:#182A2F; --ink:#E4EFF1; --ink-2:#93ACB2; --line:#26393E; --grid:#1D2F34;
+  --accent:#4DC4CF; --accent-ink:#06191C; --accent-soft:#12383D;
+  --ok:#4CCB8E; --ok-soft:#123226; --warn:#F0B040; --warn-soft:#3A2B0E; --crit:#FF6B6B; --crit-soft:#3E1717;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font:400 15px/1.55 var(--f-body);padding-inline:clamp(16px,4vw,40px);padding-block:0 56px;-webkit-text-size-adjust:100%}
+body.big{font-size:18px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+.wrap{max-width:1240px;margin-inline:auto}
+h1,h2,h3,h4{font-family:var(--f-display);line-height:1.15;text-wrap:balance;margin:0}
+h1{font-size:clamp(1.6rem,1.2rem + 1.6vw,2.3rem);font-weight:700;letter-spacing:-.015em}
+h2{font-size:1.25rem;font-weight:700;letter-spacing:-.01em}
+h3{font-size:1.05rem;font-weight:600}
+h4{font-size:.95rem;font-weight:600}
+p{margin:0}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.label{font:500 .72rem/1.2 var(--f-body);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-2)}
+.muted{color:var(--ink-2)}
+.small{font-size:.84rem}
+.hint{font-size:.8rem;color:var(--ink-2);margin-top:8px}
+
+/* header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line);padding-block:10px}
+.top .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px;justify-content:space-between}
+.brand{font:700 1.05rem/1.2 var(--f-display);letter-spacing:-.005em}
+.brand span{color:var(--accent)}
+.roles{display:flex;gap:2px;background:var(--surface-2);padding:3px;border-radius:10px;flex-wrap:wrap}
+.roles button{border:0;background:transparent;padding:7px 12px;border-radius:8px;font:600 .85rem/1.1 var(--f-body);color:var(--ink-2);text-align:center;cursor:pointer;display:flex;gap:6px;align-items:center}
+.roles button:hover{color:var(--ink)}
+.roles button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.count{font:600 .7rem/1 var(--f-mono);background:var(--crit);color:#fff;border-radius:99px;padding:3px 6px}
+.demo{background:var(--surface-2);border-bottom:1px solid var(--line);margin-inline:calc(-1*clamp(16px,4vw,40px));padding:6px clamp(16px,4vw,40px)}
+.demo .wrap{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:.8rem;color:var(--ink-2)}
+.demo button{padding:5px 9px;font-size:.78rem;border-radius:6px}
+.demo b{font-family:var(--f-mono);color:var(--ink);font-weight:500}
+
+nav.tabs{display:flex;flex-wrap:wrap;gap:2px 20px;border-bottom:1px solid var(--line);margin-block:16px 20px}
+nav.tabs button{border:0;border-bottom:2px solid transparent;border-radius:0;background:none;padding:8px 0;color:var(--ink-2);font:600 .92rem/1.2 var(--f-body);cursor:pointer;margin-bottom:-1px;display:flex;gap:6px;align-items:center}
+nav.tabs button:hover{color:var(--ink)}
+nav.tabs button[aria-current="page"]{color:var(--ink);border-bottom-color:var(--accent)}
+
+/* generic */
+.page-head{display:grid;gap:4px;margin-bottom:18px;max-width:70ch}
+.page-head p{color:var(--ink-2)}
+.cols{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px;align-items:start}
+.cols.even{grid-template-columns:repeat(2,minmax(0,1fr))}
+.stack{display:grid;gap:16px;min-width:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.panel.flat{background:transparent}
+.panel-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:4px 12px;margin-bottom:12px}
+.panel-head p{font-size:.82rem;color:var(--ink-2)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;gap:4px;min-width:0;align-content:start}
+.tile .val{font:700 1.5rem/1.15 var(--f-display)}
+.tile .sub{font-size:.82rem;color:var(--ink-2)}
+.tile[data-s="ok"]{border-top:4px solid var(--ok)} .tile[data-s="ok"] .val{color:var(--ok)}
+.tile[data-s="warn"]{border-top:4px solid var(--warn)} .tile[data-s="warn"] .val{color:var(--warn)}
+.tile[data-s="crit"]{border-top:4px solid var(--crit);background:var(--crit-soft)} .tile[data-s="crit"] .val{color:var(--crit)}
+.tile[data-s="none"]{border-top:4px solid var(--line)}
+.pill{display:inline-block;font:600 .7rem/1 var(--f-body);letter-spacing:.04em;text-transform:uppercase;padding:4px 8px;border-radius:99px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.warn{background:var(--warn-soft);color:var(--warn)} .pill.crit{background:var(--crit-soft);color:var(--crit)} .pill.info{background:var(--accent-soft);color:var(--accent)}
+button{font:600 .88rem/1.2 var(--f-body);border-radius:8px;padding:10px 14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;text-align:left}
+button:hover:not(:disabled){border-color:var(--accent)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button.danger{background:var(--crit);color:#fff;border-color:var(--crit)}
+button.quiet{padding:6px 10px;font-size:.8rem}
+button.center{text-align:center}
+button small{display:block;font-weight:400;font-size:.76rem;opacity:.85;margin-top:2px}
+.btns{display:grid;gap:8px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+input[type=text],input[type=password],input[type=number],select,textarea{width:100%;font:400 .9rem/1.35 var(--f-body);padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+input.mono,select.mono{font-family:var(--f-mono)}
+textarea{min-height:76px;resize:vertical}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.field{display:grid;gap:6px;margin-bottom:14px;min-width:0}
+.field-row{display:flex;justify-content:space-between;gap:8px;align-items:baseline;font-size:.88rem}
+.switch{display:flex;gap:10px;align-items:center;font-weight:500;cursor:pointer}
+.switch input{width:18px;height:18px;accent-color:var(--accent);flex:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.choice{position:relative}
+.choice input{position:absolute;opacity:0;inset:0;cursor:pointer;margin:0}
+.choice span{display:block;padding:8px 12px;border-radius:99px;border:1px solid var(--line);background:var(--surface);font-weight:500;font-size:.88rem}
+.choice input:checked+span{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.choice input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.checks{display:grid;gap:8px}
+.checks label{display:flex;gap:10px;align-items:flex-start;font-size:.92rem;cursor:pointer}
+.checks input{width:18px;height:18px;margin-top:2px;accent-color:var(--accent);flex:none}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.seg button{text-align:center}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.meter{height:8px;border-radius:99px;background:var(--surface-2);position:relative;overflow:hidden;margin-top:6px}
+.meter i{position:absolute;inset:0 auto 0 0;background:var(--accent);width:0}
+.meter u{position:absolute;top:0;bottom:0;width:2px;background:var(--ink)}
+.kv{width:100%;border-collapse:collapse;font-size:.86rem}
+.kv th,.kv td{padding:7px 0;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.kv th{font-weight:500;color:var(--ink-2);padding-right:10px}
+.kv td:last-child{text-align:right;font-family:var(--f-mono)}
+.kv tr:last-child th,.kv tr:last-child td{border-bottom:0}
+.scroll-x{overflow-x:auto}
+canvas{display:block;width:100%;border-radius:6px}
+.c-120{height:130px}.c-150{height:150px}.c-170{height:170px}.c-190{height:190px}
+.chart-box{min-width:0}
+.chart-box .label{display:block;margin-bottom:6px}
+.charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+
+/* banner */
+.banner{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;background:var(--crit-soft);border:1px solid var(--crit);color:var(--ink);border-radius:10px;padding:12px 16px;margin-top:16px}
+.banner strong{color:var(--crit);font-family:var(--f-display);font-size:1.1rem}
+@media (prefers-reduced-motion:no-preference){.banner{animation:pulse 1.2s ease-in-out infinite}}
+@keyframes pulse{50%{box-shadow:0 0 0 5px color-mix(in srgb,var(--crit) 25%,transparent)}}
+
+/* nudges */
+.nudges{display:grid;gap:10px;margin-bottom:16px}
+.nudge{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;background:var(--warn-soft);border:1px solid var(--warn);border-radius:10px;padding:10px 14px}
+.nudge.info{background:var(--accent-soft);border-color:var(--accent)}
+.nudge p{min-width:0;flex:1 1 260px}
+
+/* doses */
+.next{display:grid;gap:6px;padding:14px;border-radius:10px;background:var(--accent-soft);border:1px solid var(--accent);margin-bottom:6px}
+.next.due{background:var(--warn-soft);border-color:var(--warn)}
+.next .big-t{font:700 1.6rem/1.1 var(--f-display)}
+.dose{display:grid;grid-template-columns:58px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.dose:last-child{border-bottom:0}
+.dose .t{font:500 .95rem/1 var(--f-mono)}
+.dose b{font-weight:600}
+.dose span.d{display:block;font-size:.8rem;color:var(--ink-2)}
+
+/* lists */
+.list{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.list>li{padding:12px 0;border-bottom:1px solid var(--line);display:grid;gap:6px;min-width:0}
+.list>li:last-child{border-bottom:0}
+.li-head{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;justify-content:space-between}
+.li-head b{font-weight:600}
+.because{font-size:.78rem;color:var(--accent);font-weight:500}
+.fu{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 14px;align-items:center}
+.flag{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface);display:grid;gap:8px;min-width:0}
+.flag.urgent{border-color:var(--crit);border-left-width:6px}
+.flag.review{border-left:6px solid var(--warn)}
+.flag.done{opacity:.72}
+.flag .meta{font-size:.8rem;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:4px 12px}
+.flags{display:grid;gap:12px}
+.score{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center}
+.score .n{font:700 2.6rem/1 var(--f-display)}
+.factors{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px;font-size:.9rem}
+.factors li{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.factors li b{font-family:var(--f-mono);font-weight:500;color:var(--warn)}
+table.t{width:100%;border-collapse:collapse;font-size:.88rem}
+table.t th,table.t td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+table.t th{font:500 .72rem/1.2 var(--f-body);letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2)}
+table.t tr.me td{background:var(--accent-soft)}
+table.t td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.summary{white-space:pre-wrap;font:400 .86rem/1.55 var(--f-mono);background:var(--surface-2);border-radius:8px;padding:14px;margin:0;overflow-x:auto}
+.locked{display:grid;gap:4px;padding:14px;border:1px dashed var(--line);border-radius:10px;color:var(--ink-2);font-size:.9rem;background:var(--surface-2)}
+.matrix{display:grid;grid-template-columns:minmax(0,1.6fr) repeat(2,minmax(0,1fr));gap:0;font-size:.9rem}
+.matrix>div{padding:10px 8px;border-bottom:1px solid var(--line);display:flex;align-items:center}
+.matrix>div.h{font:500 .72rem/1.2 var(--f-body);letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2)}
+.matrix>div.c{justify-content:center}
+.audit{list-style:none;margin:0;padding:0;max-height:300px;overflow:auto}
+.audit li{display:grid;grid-template-columns:70px minmax(0,1fr);gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:.86rem}
+.audit time{font-family:var(--f-mono);color:var(--ink-2);font-size:.8rem}
+.log{list-style:none;margin:0;padding:0;max-height:240px;overflow:auto}
+.log li{display:grid;grid-template-columns:72px 62px minmax(0,1fr);gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:.86rem;align-items:baseline}
+.log time{font-family:var(--f-mono);color:var(--ink-2);font-size:.8rem}
+.log .k{font:500 .68rem/1 var(--f-body);letter-spacing:.06em;text-transform:uppercase;padding:4px 6px;border-radius:4px;text-align:center;background:var(--surface-2);color:var(--ink-2)}
+.log .k.ok{background:var(--ok-soft);color:var(--ok)} .log .k.warn{background:var(--warn-soft);color:var(--warn)} .log .k.crit{background:var(--crit-soft);color:var(--crit)}
+.insight{border-left:3px solid var(--accent);padding:2px 0 2px 12px;font-size:.92rem}
+
+/* fall state machine */
+.states{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.node{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface-2);min-width:0;display:grid;gap:3px;align-content:start}
+.node b{font:500 .8rem/1.2 var(--f-mono);letter-spacing:.04em}
+.node span{font-size:.78rem;color:var(--ink-2);line-height:1.35}
+.node em{font:500 .78rem/1.2 var(--f-mono);font-style:normal;min-height:1em;color:var(--ink)}
+.node.on{background:var(--accent-soft);border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.node.on.crit{background:var(--crit-soft);border-color:var(--crit);box-shadow:inset 0 0 0 1px var(--crit)}
+.readout{display:flex;flex-wrap:wrap;gap:6px 22px;margin-top:12px;font-size:.88rem}
+.readout b{font-family:var(--f-mono);font-weight:500}
+.oled{background:var(--oled-bg);color:var(--oled-fg);border-radius:8px;border:6px solid #1B2A2E;aspect-ratio:2/1;max-width:100%;padding:8px 12px;font:500 clamp(.72rem,2.6vw,.85rem)/1.45 var(--f-mono);white-space:pre;overflow:hidden;position:relative}
+.oled .buzz{position:absolute;right:10px;top:6px;color:#FF8A8A}
+.tag{font:500 .72rem/1 var(--f-body);padding:4px 8px;border-radius:99px;background:var(--surface-2);color:var(--ink-2)}
+.tag.ok{background:var(--ok-soft);color:var(--ok)} .tag.warn{background:var(--warn-soft);color:var(--warn)}
+details.panel>summary{cursor:pointer;font:600 1rem/1.2 var(--f-display)}
+details.panel[open]>summary{margin-bottom:12px}
+footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);color:var(--ink-2);font-size:.84rem;max-width:80ch}
+
+@media (max-width:1000px){
+  .cols,.cols.even{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:700px){
+  .charts{grid-template-columns:minmax(0,1fr)}
+  .states{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .log li{grid-template-columns:64px 56px minmax(0,1fr);gap:8px}
+  .fu{grid-template-columns:minmax(0,1fr)}
+  .score{grid-template-columns:minmax(0,1fr)}
+  .matrix{grid-template-columns:minmax(0,1.3fr) repeat(2,minmax(0,.8fr));font-size:.82rem}
+}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;z-index:50;max-width:calc(100% - 32px);font-size:.9rem;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.result{border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:.92rem;background:var(--ok-soft);border:1px solid var(--ok)}
+.result.urgent{background:var(--crit-soft);border-color:var(--crit)}
+.result.review{background:var(--warn-soft);border-color:var(--warn)}
+.err{color:var(--crit);font-size:.85rem}
+.fieldset{border:0;padding:0;margin:0 0 14px}
+#tabs[hidden]+#view{margin-top:20px}
+</style>
+<header class="top"><div class="wrap">
+  <div class="brand">Parkinson's <span>Care Continuity</span></div>
+  <div class="roles" id="roles" role="group" aria-label="View the app as"></div>
+</div></header>
+<div class="demo"><div class="wrap">
+  <span class="label">Demo controls</span>
+  <span>Clock <b id="clk"></b></span>
+  <button data-act="adv" data-v="1">+1 h</button>
+  <button data-act="adv" data-v="3">+3 h</button>
+  <button data-act="fall">Simulate a fall</button>
+  <button data-act="reset">Reset demo</button>
+</div></div>
+<main class="wrap">
+  <div id="banner" class="banner" hidden role="alert"></div>
+  <nav id="tabs" class="tabs" aria-label="Sections"></nav>
+  <div id="view"></div>
+  <footer>Prototype built for the Synesis 26 continuity-of-care challenge. All patients, doses and results are sample data. It supports clinical review and never replaces clinical judgment. It is not a medical device and does not diagnose or treat any condition. In an emergency call 112.</footer>
+</main>
+<div id="toast" class="toast" role="status" hidden></div>
+<script>
+(function(){'use strict';
+/* ================= helpers ================= */
+const $=id=>document.getElementById(id);
+const DAY=864e5,HR=36e5;
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const T0=(()=>{const d=new Date();d.setHours(0,0,0,0);return d.getTime();})();
+let clockOff=0;
+const now=()=>Date.now()+clockOff;
+const hoursNow=()=>{const d=new Date(now());return d.getHours()+d.getMinutes()/60;};
+const fT=ms=>{const d=new Date(ms);return pad(d.getHours())+':'+pad(d.getMinutes());};
+const fD=ms=>new Date(ms).toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+const fDT=ms=>fD(ms)+', '+fT(ms);
+const fH=h=>{const m=Math.round(h*60);return pad(Math.floor(m/60))+':'+pad(m%60);};
+const mean=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function advanceClock(h){
+  const max=T0+DAY-60e3,target=Math.min(Date.now()+clockOff+h*HR,max);
+  clockOff=Math.max(0,target-Date.now());
+}
+
+/* ================= reference data ================= */
+const MEDS=[
+  {id:'ld1',name:'Levodopa/Carbidopa',dose:'100/25 mg',h:7,lev:true},
+  {id:'ld2',name:'Levodopa/Carbidopa',dose:'100/25 mg',h:11,lev:true},
+  {id:'ld3',name:'Levodopa/Carbidopa',dose:'100/25 mg',h:15,lev:true},
+  {id:'ld4',name:'Levodopa/Carbidopa',dose:'100/25 mg',h:19,lev:true},
+  {id:'pr',name:'Pramipexole',dose:'0.5 mg',h:21,lev:false}
+];
+const SIGNS=[
+  {id:'hurt',t:'I fell and I am hurt, or I hit my head',u:1},
+  {id:'faint',t:'I fainted or blacked out',u:1},
+  {id:'choke',t:'I am choking or cannot swallow safely',u:1},
+  {id:'chest',t:'Chest pain or trouble breathing',u:1},
+  {id:'conf',t:'New confusion, or seeing things that are not there',u:0},
+  {id:'frozen',t:'Sudden severe stiffness, I can barely move',u:0},
+  {id:'dizzy',t:'Dizzy or light-headed when I stand up',u:0},
+  {id:'writhe',t:'New twisting or writhing movements',u:0}
+];
+const CATS=[
+  {id:'sensor',t:'Tremor and fall sensor data'},
+  {id:'meds',t:'Medication log and adherence'},
+  {id:'checkins',t:'Daily check-ins and symptoms'},
+  {id:'follow',t:'Appointments and follow-up tests'}
+];
+const OTHERS=[
+  {n:'S. Krishnan, 72',att:'Elevated',a:84,fl:2,gaps:1,ci:'Today',next:'Sat 17 Oct'},
+  {n:'M. Devadas, 64',att:'Low',a:97,fl:0,gaps:0,ci:'Today',next:'Wed 28 Oct'},
+  {n:'F. Sultana, 70',att:'High',a:71,fl:3,gaps:2,ci:'3 days ago',next:'Missed 9 Oct'},
+  {n:'G. Prabhu, 59',att:'Low',a:93,fl:0,gaps:0,ci:'Yesterday',next:'Mon 2 Nov'}
+];
+
+/* ================= state ================= */
+const S={
+  patient:{name:'Arjun Rao',first:'Arjun',age:67,dx:'Parkinson’s disease, 6 years',clinician:'Dr. Meera Iyer',caregiver:'Lakshmi Rao',cgFirst:'Lakshmi',discharged:T0-14*DAY},
+  days:[],falls:[],flags:[],followups:[],instructions:[],audit:[],
+  circ:{livesAlone:true,stairs:true,eveningsOnly:true,hardTravel:true,smallPrint:false},
+  consent:{care:{sensor:true,meds:true,checkins:true,follow:true},cg:{sensor:true,meds:true,checkins:false,follow:true}},
+  rules:{missed:{on:true,p:3},rise:{on:true,p:30},off:{on:true,p:3},gap:{on:true,p:0}},
+  role:'patient',tab:{patient:'today',caregiver:'overview',care:'overview'},
+  draft:{state:'',mood:'',sleep:'',stiff:1,signs:[],note:''},
+  ciResult:null,seq:0
+};
+const dayAt=o=>S.days.find(d=>d.off===o);
+const today=()=>dayAt(0);
+
+/* tremor amplitude as a function of hours since the last levodopa dose (wearing-off pattern) */
+const sm=t=>{t=clamp(t,0,1);return t*t*(3-2*t);};
+const ampOf=hs=>2.2+10.5*sm((hs-1.8)/2.4);
+
+function lastLevAt(ms){
+  for(let i=S.days.length-1;i>=0;i--){
+    let best=0;
+    for(const m of MEDS)if(m.lev){const x=S.days[i].doses[m.id];if(x&&x.st==='taken'&&x.at<=ms&&x.at>best)best=x.at;}
+    if(best)return best;
+  }
+  return 0;
+}
+function hoursSinceLev(ms){const la=lastLevAt(ms);return la?Math.min(6,(ms-la)/HR):6;}
+
+function seed(){
+  const R=rng(7);
+  S.days=[];S.falls=[];S.flags=[];S.audit=[];S.instructions=[];S.followups=[];S.seq=0;S.ciResult=null;
+  const forced={'-5':['ld3'],'-3':['ld3','ld4'],'-2':['ld2','ld3','pr'],'-1':['ld3']};
+  for(let d=-14;d<=0;d++){
+    const day={off:d,doses:{},hourly:{},ci:null};
+    for(const m of MEDS){
+      const sched=T0+d*DAY+m.h*HR;
+      if(d===0){
+        if(sched<now()-1.5*HR)day.doses[m.id]={st:'taken',at:sched+Math.round(R()*30)*60e3};
+        continue;
+      }
+      const miss=(forced[d]||[]).includes(m.id)||(d<-5&&R()<0.02);
+      day.doses[m.id]=miss?{st:'missed'}:{st:'taken',at:sched+Math.round(R()*35)*60e3};
+    }
+    S.days.push(day);
+  }
+  for(const day of S.days){
+    const d=day.off,mult=d<=-8?1:1+0.06*(d+8);
+    const last=d===0?Math.floor(hoursNow())-1:22;
+    for(let hr=6;hr<=last&&hr<=22;hr++){
+      const ms=T0+d*DAY+(hr+0.5)*HR;
+      day.hourly[hr]=+Math.max(0.5,ampOf(hoursSinceLev(ms))*mult+(R()-0.5)*1.4).toFixed(1);
+    }
+  }
+  const off=[1,1,0,1,1,2,1,2,2,2,3,4,3,4],sleep=[7.2,7.0,7.5,7.1,6.8,7.3,7.0,6.6,6.4,6.0,5.6,5.4,5.0,5.2];
+  const stiff=[1,1,1,1,1,2,1,2,2,2,2,3,3,3],mood=[4,4,5,4,4,4,4,4,3,3,3,3,2,3];
+  const notes={'-5':'Missed the 15:00 dose, was at the market.','-4':'Slipped near the bathroom in the evening. No injury, but it shook me.','-3':'Did not go to physiotherapy. Afraid of falling again.','-2':'Legs feel heavy by afternoon. Skipped the lunchtime dose because I was out.','-1':'Very tired. Hands shaky most of the afternoon.'};
+  for(let i=0;i<14;i++){
+    const d=i-14,day=dayAt(d);
+    day.ci={state:off[i]>=3?'Off':'On',mood:mood[i],sleep:sleep[i],stiff:stiff[i],offH:off[i],signs:[],note:notes[d]||'',at:T0+d*DAY+20*HR};
+  }
+  S.falls.push({id:'fall-seed',ts:T0-4*DAY+18.67*HR,ack:true,ackBy:'Lakshmi Rao',ackAt:T0-4*DAY+18.67*HR+4*60e3,src:'sensor'});
+  S.flags.push({key:'fall:seed',event:true,active:true,sev:'urgent',src:'sensor',title:'Fall detected by the wearable',why:'Free-fall and impact confirmed, patient stayed down 3 s. Caregiver acknowledged after 4 min.',ts:T0-4*DAY+18.67*HR,status:'reviewed',note:'Phoned patient. No injury. Reviewed footwear and bathroom set-up.'});
+  S.followups=[
+    {id:'f1',type:'appt',title:'Discharge review',who:'Dr. Iyer, neurology',due:T0-14*DAY+10*HR,status:'done'},
+    {id:'f6',type:'appt',title:'Speech therapy review',who:'Speech therapist',due:T0-10*DAY+15*HR,status:'done'},
+    {id:'f2',type:'test',title:'Blood tests (blood count, liver function)',who:'Lab',due:T0-7*DAY+9*HR,status:'pending'},
+    {id:'f3',type:'appt',title:'Physiotherapy session',who:'Physiotherapy clinic',due:T0-3*DAY+16*HR,status:'missed'},
+    {id:'f5',type:'test',title:'Lying and standing blood pressure',who:'Nurse visit at home',due:T0+3*DAY+10*HR,status:'scheduled'},
+    {id:'f4',type:'appt',title:'Neurology teleconsult',who:'Dr. Iyer, video call',due:T0+5*DAY+10.5*HR,status:'scheduled'}
+  ];
+  S.instructions=[
+    {id:'i1',from:'Dr. Iyer',date:T0-14*DAY+11*HR,cat:'Medication',text:'Take levodopa/carbidopa at 07:00, 11:00, 15:00 and 19:00, and pramipexole at 21:00. If you miss a dose, ask your pharmacist or the clinic what to do instead of guessing.',isNew:false},
+    {id:'i2',from:'Dr. Iyer',date:T0-14*DAY+11*HR,cat:'Movement',text:'Physiotherapy twice a week. Walk for 20 minutes each day with your cane when your doses are working.',isNew:false},
+    {id:'i3',from:'Dr. Iyer',date:T0-14*DAY+11*HR,cat:'Safety',text:'Stand up slowly. Sit on the edge of the bed for a minute before you stand. Keep a light on in the hallway at night.',isNew:false},
+    {id:'i4',from:'Dr. Iyer',date:T0-14*DAY+11*HR,cat:'Tests',text:'Blood tests within 7 days of discharge. A nurse will check your blood pressure lying and standing.',isNew:false}
+  ];
+  S.audit.push({ts:T0-1*DAY+9.5*HR,who:S.patient.clinician,what:'Viewed medication log and tremor trends'});
+  evaluate(true);
+  const f=S.flags.find(x=>x.key==='fall:seed');if(f)f.status='reviewed';
+}
+
+/* ================= metrics ================= */
+function dosesOn(day){
+  const t=now();
+  return MEDS.map(m=>{
+    const sched=T0+day.off*DAY+m.h*HR,x=day.doses[m.id];
+    let st;
+    if(x)st=x.st;
+    else if(day.off<0)st='missed';
+    else{const late=t-sched;st=late<0?'upcoming':late<60*60e3?'due':late<120*60e3?'overdue':'missed';}
+    return{m,sched,st,at:x&&x.at};
+  });
+}
+function adh(from,to){
+  let tk=0,ms=0,lm=0;
+  for(const day of S.days)if(day.off>=from&&day.off<=to)for(const r of dosesOn(day)){
+    if(r.st==='taken')tk++;else if(r.st==='missed'){ms++;if(r.m.lev)lm++;}
+  }
+  return{tk,ms,lm,pct:tk+ms?Math.round(100*tk/(tk+ms)):100};
+}
+function dayMean(day){const v=Object.values(day.hourly);return v.length?mean(v):null;}
+function tIdx(from,to){const v=S.days.filter(d=>d.off>=from&&d.off<=to).map(dayMean).filter(x=>x!=null);return v.length?mean(v):null;}
+function tRise(){const c=tIdx(-7,-1),p=tIdx(-14,-8);return c&&p?Math.round((c/p-1)*100):0;}
+function ciAvg(field,from,to){const v=S.days.filter(d=>d.off>=from&&d.off<=to&&d.ci).map(d=>d.ci[field]).filter(x=>x!=null);return v.length?mean(v):null;}
+function doseCurve(){
+  const bins=[0,1,2,3,4,5].map(()=>({s:0,n:0}));
+  for(const day of S.days){
+    if(day.off>=0)continue;
+    for(const hr of Object.keys(day.hourly)){
+      const ms=T0+day.off*DAY+(+hr+0.5)*HR,la=lastLevAt(ms);
+      if(!la)continue;
+      const hs=clamp((ms-la)/HR,0,5.99);
+      bins[Math.floor(hs)].s+=day.hourly[hr];bins[Math.floor(hs)].n++;
+    }
+  }
+  return bins.map(b=>b.n?+(b.s/b.n).toFixed(1):null);
+}
+function doseInsight(){
+  const c=doseCurve(),base=mean([c[0],c[1]].filter(x=>x!=null));
+  if(!base)return null;
+  for(let i=2;i<c.length;i++)if(c[i]!=null&&c[i]>base*1.6)return{hours:i,base,peak:Math.max(...c.filter(x=>x!=null))};
+  return null;
+}
+function gaps(){
+  const t=now();
+  return S.followups.filter(f=>(f.type==='test'&&f.status==='pending'&&f.due<t)||f.status==='missed'||f.status==='requested');
+}
+function gapText(f){
+  const d=Math.max(0,Math.floor((now()-f.due)/DAY));
+  if(f.status==='requested')return 'Reschedule requested. Waiting for the clinic to confirm a new time.';
+  if(f.status==='missed')return 'Missed '+(d?d+' day'+(d>1?'s':'')+' ago':'today')+'. Not rebooked yet.';
+  return 'Overdue by '+d+' day'+(d===1?'':'s')+'.';
+}
+function trendLine(){
+  const pts=[];
+  for(let d=-7;d<=-1;d++){const v=dayMean(dayAt(d));if(v!=null)pts.push([d,v]);}
+  if(pts.length<3)return null;
+  const mx=mean(pts.map(p=>p[0])),my=mean(pts.map(p=>p[1]));
+  let num=0,den=0;for(const p of pts){num+=(p[0]-mx)*(p[1]-my);den+=(p[0]-mx)**2;}
+  const b=den?num/den:0,a=my-b*mx;
+  return{at:d=>Math.max(0,a+b*d),slope:b};
+}
+function attention(){
+  const f=[],a=adh(-6,0),rise=tRise(),sl=ciAvg('sleep',-3,-1),of=ciAvg('offH',-3,-1),g=gaps().length;
+  if(a.pct<80)f.push(['Doses logged in the last 7 days: '+a.pct+'%',25]);else if(a.pct<90)f.push(['Doses logged in the last 7 days: '+a.pct+'%',12]);
+  if(rise>=30)f.push(['Tremor index up '+rise+'% on the week before',20]);else if(rise>=15)f.push(['Tremor index up '+rise+'% on the week before',10]);
+  if(sl!=null&&sl<6)f.push(['Sleep averaging '+sl.toFixed(1)+' h over 3 days',15]);
+  if(of!=null&&of>=3)f.push(['Off-time averaging '+of.toFixed(1)+' h a day over 3 days',15]);
+  if(g>=2)f.push([g+' follow-up gaps open',15]);else if(g===1)f.push(['1 follow-up gap open',8]);
+  const fall=S.falls.find(x=>x.ts>now()-7*DAY);
+  if(fall)f.push(['Fall on '+fDT(fall.ts),25]);
+  const score=Math.min(100,f.reduce((s,x)=>s+x[1],0));
+  return{score,level:score>=60?'High':score>=30?'Elevated':'Low',factors:f};
+}
+
+/* ================= rules ================= */
+function evaluate(silent){
+  const found=[],R=S.rules,t=now();
+  if(R.missed.on){
+    const a=adh(-2,0);
+    if(a.lm>=R.missed.p){
+      const cnt={};
+      for(const day of S.days)if(day.off>=-2)for(const r of dosesOn(day))if(r.st==='missed'&&r.m.lev)cnt[r.m.h]=(cnt[r.m.h]||0)+1;
+      const top=Object.keys(cnt).sort((x,y)=>cnt[y]-cnt[x])[0];
+      found.push({key:'missed',sev:'review',src:'medication',title:a.lm+' levodopa doses missed in 3 days',why:'Threshold is '+R.missed.p+'. Most often missed: '+fH(+top)+'.',ts:t});
+    }
+  }
+  if(R.rise.on){
+    const r=tRise();
+    if(r>=R.rise.p)found.push({key:'rise',sev:'review',src:'sensor',title:'Tremor index up '+r+'% on the previous week',why:'7-day average '+tIdx(-7,-1).toFixed(1)+' °/s against '+tIdx(-14,-8).toFixed(1)+' °/s the week before. Threshold is '+R.rise.p+'%.',ts:t});
+  }
+  if(R.off.on){
+    const v=[-3,-2,-1].map(o=>dayAt(o).ci&&dayAt(o).ci.offH);
+    if(v.every(x=>x!=null&&x>=R.off.p))found.push({key:'off',sev:'review',src:'check-in',title:'Off-time of '+R.off.p+' h or more for 3 days running',why:'Patient reported '+v.join(', ')+' h of off-time on the last three days.',ts:t});
+  }
+  if(R.gap.on)for(const f of gaps())found.push({key:'gap:'+f.id,sev:f.status==='requested'?'info':'review',src:'follow-up',title:(f.type==='test'?'Overdue test: ':f.status==='requested'?'Reschedule requested: ':'Missed appointment: ')+f.title,why:gapText(f),ts:f.due});
+  for(const x of found){
+    const ex=S.flags.find(y=>y.key===x.key);
+    if(!ex)S.flags.push({...x,active:true,status:'new'});
+    else if(!ex.event){ex.active=true;ex.why=x.why;ex.title=x.title;ex.sev=x.sev;}
+  }
+  for(const y of S.flags)if(!y.event&&!found.some(x=>x.key===y.key))y.active=false;
+}
+const openFlags=()=>S.flags.filter(f=>(f.event||f.active)&&f.status==='new');
+function audit(who,what){S.audit.unshift({ts:now(),who,what});if(S.audit.length>60)S.audit.pop();}
+const shared=(role,cat)=>S.consent[role][cat];
+/* ================= sensor engine (tremor FFT + fall state machine, from the original monitor) ================= */
+const SR=100,N=64,BAND_LO=3.5,BAND_HI=7.0,ARTEFACT=100;let THR=4.0;
+const FALL={free:0.35,impact:2.5,gyro:120};let confirmMoveMs=500;
+const live={a:1,g:0,n:0,lastN:0,rate:0,gyro:false,wake:null,timer:0};
+const sim={t:0,carry:0,steps:0,tremorOn:true,f:5,A:15,auto:true,sc:null,alert:false,buzzUntil:0,sound:false,live:false};
+const fs={state:'IDLE',t0:0};
+const tr={on:false,energy:0,freq:0,mags:new Float64Array(N/2+1)};
+const acc=[],gyro=[],trend=[];
+const cnt={s:0,f:0,t:0,d:0};
+const sLog=[];
+let warm=true,syncT=null;
+function randn(){let u=0;while(!u)u=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*Math.random());}
+
+const win=new Float64Array(N);let wsum=0;
+for(let i=0;i<N;i++){win[i]=0.54-0.46*Math.cos(2*Math.PI*i/(N-1));wsum+=win[i];}
+function fft(re,im){
+  const n=re.length;
+  for(let i=1,j=0;i<n;i++){let bit=n>>1;for(;j&bit;bit>>=1)j^=bit;j^=bit;if(i<j){let x=re[i];re[i]=re[j];re[j]=x;x=im[i];im[i]=im[j];im[j]=x;}}
+  for(let len=2;len<=n;len<<=1){
+    const ang=-2*Math.PI/len;
+    for(let i=0;i<n;i+=len)for(let k=0;k<len/2;k++){
+      const wr=Math.cos(ang*k),wi=Math.sin(ang*k),a=i+k,b=i+k+len/2;
+      const xr=re[b]*wr-im[b]*wi,xi=re[b]*wi+im[b]*wr;
+      re[b]=re[a]-xr;im[b]=im[a]-xi;re[a]+=xr;im[a]+=xi;
+    }
+  }
+}
+function slog(kind,msg){
+  if(warm)return;
+  sLog.unshift({d:new Date(now()),kind,msg});
+  if(sLog.length>40)sLog.pop();
+}
+
+/* demo tremor follows the wearing-off curve of the last levodopa dose */
+function syncAuto(){
+  if(!sim.auto||sim.live)return;
+  const h=hoursNow();
+  if(h<6||h>=23){sim.A=1;sim.tremorOn=false;return;}
+  sim.tremorOn=true;
+  sim.A=ampOf(hoursSinceLev(now()));
+  sim.f=5+0.3*Math.sin(sim.t*0.05);
+}
+
+function scenarioSample(sc,e){
+  if(sc.kind==='fall'){
+    if(e<0.30)return{a:0.12+0.04*randn()};
+    if(e<0.36)return{a:3.4+0.2*randn(),g:210+10*randn()};
+    if(e<0.55)return{a:1.6-(e-0.36)*3+0.05*randn()};
+    return{a:1+0.008*randn(),still:true};
+  }
+  if(sc.kind==='stumble'){
+    if(e<0.28)return{a:0.15+0.04*randn()};
+    if(e<0.34)return{a:3.0+0.2*randn(),g:180};
+    if(e<0.8)return{a:1+0.05*randn()};
+    if(e<1.6)return{a:1+0.58*Math.sin((e-0.8)*2*Math.PI*1.4)+0.02*randn()};
+    return null;
+  }
+  if(e<0.3)return{a:0.65+0.03*randn()};
+  if(e<0.42)return{a:1.55+0.05*randn()};
+  return null;
+}
+function genSample(){
+  if(sim.live)return{a:live.a,g:live.g};
+  const t=sim.t;
+  let a=1+0.02*randn()+0.03*Math.sin(2*Math.PI*1.8*t);
+  let g=20+4*Math.sin(2*Math.PI*0.3*t)+1.2*randn();
+  if(sim.tremorOn)g+=sim.A*Math.sin(2*Math.PI*sim.f*t);
+  const sc=sim.sc;
+  if(sc){
+    const e=t-sc.t0,end=sc.kind==='fall'?4.6:sc.kind==='stumble'?2.2:0.7;
+    if(e>end)sim.sc=null;
+    else{const o=scenarioSample(sc,e);if(o){if(o.a!==undefined)a=o.a;if(o.g!==undefined)g=o.g;}}
+  }
+  return{a:Math.max(0,a),g:Math.max(0,g)};
+}
+function analyse(){
+  const seg=gyro.slice(-N);
+  if(seg.length<N)return;
+  cnt.t++;
+  let m=0,mx=0;for(const v of seg){m+=v;if(v>mx)mx=v;}m/=N;
+  const re=new Float64Array(N),im=new Float64Array(N);
+  for(let i=0;i<N;i++)re[i]=(seg[i]-m)*win[i];
+  fft(re,im);
+  for(let k=0;k<=N/2;k++)tr.mags[k]=Math.hypot(re[k],im[k])*2/wsum;
+  if(mx>ARTEFACT||fs.state!=='IDLE')return;
+  let e2=0;
+  for(let k=0;k<=N/2;k++){const f=k*SR/N;if(f>=BAND_LO&&f<=BAND_HI)e2+=tr.mags[k]*tr.mags[k];}
+  tr.energy=Math.sqrt(e2);
+  let pk=2,pv=0;
+  for(let k=2;k<=5;k++)if(tr.mags[k]>pv){pv=tr.mags[k];pk=k;}
+  const a=tr.mags[pk-1],b=tr.mags[pk],c=tr.mags[pk+1],den=a-2*b+c;
+  const d=den?clamp(0.5*(a-c)/den,-0.5,0.5):0;
+  tr.freq=(pk+d)*SR/N;
+  const was=tr.on;
+  if(!tr.on&&tr.energy>THR)tr.on=true;
+  else if(tr.on&&tr.energy<THR*0.75)tr.on=false;
+  if(tr.on!==was){
+    slog(tr.on?'warn':'ok',tr.on?'Tremor detected near '+tr.freq.toFixed(1)+' Hz, band energy '+tr.energy.toFixed(1)+' °/s':'Tremor cleared');
+    if(!warm)touch();
+  }
+}
+function fallStep(a,g){
+  cnt.f++;
+  const t=sim.t;
+  if(fs.state==='IDLE'){
+    if(a<FALL.free){fs.state='FREE_FALL';fs.t0=t;slog('warn','Free-fall detected ('+a.toFixed(2)+' g). Watching for impact.');touch();}
+  }else if(fs.state==='FREE_FALL'){
+    const dt=(t-fs.t0)*1000;
+    if(dt>500){fs.state='IDLE';slog('info','No impact within 500 ms. Back to IDLE.');touch();}
+    else if(dt>=100&&a>FALL.impact&&g>FALL.gyro){fs.state='CONFIRM';fs.t0=t;slog('warn','Impact '+a.toFixed(1)+' g and '+Math.round(g)+' °/s after '+Math.round(dt)+' ms. Confirming for 3 s.');touch();}
+  }else if(fs.state==='CONFIRM'){
+    const dt=(t-fs.t0)*1000;
+    if(dt>=confirmMoveMs&&Math.abs(a-1)>0.5){fs.state='IDLE';slog('ok','Patient moved during confirmation. Fall dismissed, no alert sent.');touch();}
+    else if(dt>=3000){
+      fs.state='ALERT';sim.alert=true;sim.buzzUntil=t+6;
+      slog('crit','Fall confirmed. Buzzer on for 6 s, alert sent to caregiver and care team.');
+      onFallAlert();
+    }
+  }
+}
+const hb={hr:-1,s:0,n:0};
+function mergeHourly(){
+  const h=Math.floor(hoursNow());
+  if(h!==hb.hr){hb.hr=h;hb.s=0;hb.n=0;}
+  if(h<6||h>22)return;
+  hb.s+=tr.energy;hb.n++;
+  const day=today();if(day)day.hourly[h]=+(hb.s/hb.n).toFixed(1);
+}
+function step(){
+  sim.t+=0.01;sim.steps++;
+  const s=genSample();
+  acc.push(s.a);gyro.push(s.g);
+  if(acc.length>400)acc.shift();
+  if(gyro.length>300)gyro.shift();
+  cnt.s++;
+  if(sim.steps%2===0)fallStep(s.a,s.g);
+  if(sim.steps%20===0)analyse();
+  if(sim.steps%50===0){
+    cnt.d++;
+    trend.push(tr.energy);if(trend.length>240)trend.shift();
+    syncAuto();
+    if(!warm){
+      mergeHourly();
+      if(sim.alert&&sim.buzzUntil&&sim.t>=sim.buzzUntil){sim.buzzUntil=0;slog('info','Buzzer stopped after 6 s. Alert stays active until acknowledged.');}
+      if(sim.alert&&sim.buzzUntil){if(sim.sound)beep();if(navigator.vibrate){try{navigator.vibrate(300);}catch(e){}}}
+      blynkSend(false);
+      syncT=new Date();
+      onTick();
+    }
+  }
+}
+let actx=null;
+function beep(){
+  try{const o=actx.createOscillator(),g=actx.createGain();o.type='square';o.frequency.value=880;g.gain.value=0.04;o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+0.25);}catch(e){}
+}
+function startScenario(kind){
+  if(sim.sc||fs.state!=='IDLE'||sim.live)return;
+  sim.sc={kind,t0:sim.t};
+  slog('info',{fall:'Simulating a fall.',stumble:'Simulating a stumble with recovery.',sit:'Simulating a quick sit-down.'}[kind]);
+  touch();
+}
+function engineReset(){
+  acc.length=0;gyro.length=0;trend.length=0;
+  tr.on=false;tr.energy=0;tr.freq=0;tr.mags.fill(0);
+  fs.state='IDLE';fs.t0=0;sim.alert=false;sim.buzzUntil=0;sim.sc=null;
+}
+function warmUp(){
+  warm=true;
+  for(let i=0;i<12000;i++)step();
+  cnt.s=cnt.f=cnt.t=cnt.d=0;
+  hb.hr=-1;warm=false;
+}
+
+/* ---- phone sensors (works when this file is served over HTTPS) ---- */
+function onMotion(e){
+  const ag=e.accelerationIncludingGravity,rr=e.rotationRate;
+  if(!ag||ag.x==null||ag.y==null||ag.z==null)return;
+  live.a=Math.hypot(ag.x,ag.y,ag.z)/9.80665;
+  if(rr&&rr.alpha!=null&&rr.beta!=null&&rr.gamma!=null){live.g=Math.hypot(rr.alpha,rr.beta,rr.gamma);live.gyro=true;}
+  live.n++;
+}
+async function lockScreen(){
+  try{if('wakeLock' in navigator&&!live.wake){live.wake=await navigator.wakeLock.request('screen');live.wake.addEventListener('release',()=>{live.wake=null;});}}catch(e){}
+}
+async function startLive(){
+  if(sim.live)return;
+  if(!window.isSecureContext){setSrcMsg('Phone sensors only work on pages served over HTTPS. Host this file and open the https:// link on your phone.');return;}
+  if(typeof DeviceMotionEvent==='undefined'){setSrcMsg('This browser has no motion sensors. Open the page on a phone.');return;}
+  try{
+    if(typeof DeviceMotionEvent.requestPermission==='function'){
+      const r=await DeviceMotionEvent.requestPermission();
+      if(r!=='granted'){setSrcMsg('Motion access was denied. Close this tab, reopen the page and tap Allow when asked.');return;}
+    }
+  }catch(err){setSrcMsg('Could not get motion permission: '+err.message);return;}
+  live.n=0;live.lastN=0;live.rate=0;live.gyro=false;live.a=1;live.g=0;
+  window.addEventListener('devicemotion',onMotion);
+  sim.live=true;engineReset();lockScreen();
+  live.timer=setInterval(()=>{live.rate=live.n-live.lastN;live.lastN=live.n;},1000);
+  setSrcMsg('Phone sensors live. Hold the phone like a wearable, for example resting in your hand.');
+  slog('info','Phone sensors started. Reading accelerometer and gyroscope.');
+  setTimeout(()=>{if(sim.live&&live.n===0)setSrcMsg('No sensor data has arrived. This device may have no motion sensors, or the browser is blocking them. Use Simulator instead.');},2500);
+  confirmMoveMs=1000;renderAll();
+}
+function stopLive(){
+  window.removeEventListener('devicemotion',onMotion);
+  clearInterval(live.timer);
+  if(live.wake){try{live.wake.release();}catch(e){}live.wake=null;}
+  sim.live=false;engineReset();confirmMoveMs=500;
+  syncAuto();warmUp();
+  setSrcMsg('Simulator running. Choose Phone sensors for real readings.');
+  slog('info','Switched to the simulator.');
+  renderAll();
+}
+document.addEventListener('visibilitychange',()=>{if(sim.live&&document.visibilityState==='visible')lockScreen();});
+
+/* ---- Blynk (optional, needs a network the page is allowed to reach) ---- */
+const bl={token:'',host:'blynk.cloud',state:'off',err:'',lastKey:'',lastSent:0};
+try{bl.token=localStorage.getItem('pdm.token')||'';bl.host=localStorage.getItem('pdm.host')||'blynk.cloud';}catch(e){}
+bl.state=bl.token?'wait':'off';
+const blTag=()=>({off:'--',wait:'..',ok:'OK',sent:'OK?',err:'ERR'}[bl.state]);
+function blMsg(){return {off:'No token set. Readings stay on this device.',wait:'Token saved. Waiting for the first update.',ok:'Connected. V0, V1 and V2 are updating.',sent:'Sent, but the browser hides the reply from Blynk, so delivery is unconfirmed.',err:bl.err||'Could not reach Blynk.'}[bl.state];}
+function blynkSend(force){
+  if(!bl.token)return;
+  const v0=sim.alert?'FALL':'NORMAL',v1=tr.on?1:0,v2=sim.alert?1:0;
+  const key=v0+v1+v2,t=Date.now();
+  if(!force&&key===bl.lastKey&&t-bl.lastSent<5000)return;
+  bl.lastKey=key;bl.lastSent=t;
+  const url='https://'+bl.host+'/external/api/batch/update?token='+encodeURIComponent(bl.token)+'&V0='+v0+'&V1='+v1+'&V2='+v2;
+  fetch(url).then(r=>{if(r.ok)bl.state='ok';else{bl.state='err';bl.err='Blynk refused the update (HTTP '+r.status+'). Check the token and server.';}})
+  .catch(()=>{fetch(url,{mode:'no-cors'}).then(()=>{bl.state='sent';}).catch(()=>{bl.state='err';bl.err='Could not reach '+bl.host+'. Check your connection and the server name.';});});
+}
+/* ================= charts ================= */
+const C={};
+function readColors(){
+  const s=getComputedStyle(document.documentElement);
+  for(const k of ['ink','ink-2','line','grid','accent','accent-soft','ok','warn','crit','surface'])C[k]=s.getPropertyValue('--'+k).trim()||'#888';
+}
+function setup(c){
+  const r=c.getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,2);
+  if(!r.width||!r.height)return null;
+  const w=Math.round(r.width*d),h=Math.round(r.height*d);
+  if(c.width!==w||c.height!==h){c.width=w;c.height=h;}
+  const x=c.getContext('2d');if(!x)return null;
+  x.setTransform(d,0,0,d,0,0);x.clearRect(0,0,r.width,r.height);
+  return{x,w:r.width,h:r.height};
+}
+const MONO='10px "IBM Plex Mono",ui-monospace,Menlo,monospace';
+function frame(c,o){
+  const s=setup(c);if(!s)return null;
+  const{x,w,h}=s,pl=o.left||34,pr=10,pt=8,pb=20,pw=w-pl-pr,ph=h-pt-pb;
+  const X=v=>pl+(v-o.x0)/(o.x1-o.x0)*pw,Y=v=>pt+ph-(v-o.y0)/(o.y1-o.y0)*ph;
+  x.font=MONO;x.textBaseline='middle';
+  for(const tk of o.yt){
+    const y=Y(tk);x.strokeStyle=C.grid;x.lineWidth=1;x.beginPath();x.moveTo(pl,y);x.lineTo(pl+pw,y);x.stroke();
+    x.fillStyle=C['ink-2'];x.textAlign='right';x.fillText(String(tk),pl-6,y);
+  }
+  x.textBaseline='alphabetic';x.textAlign='center';x.fillStyle=C['ink-2'];
+  for(const tk of o.xt){const tw=x.measureText(tk[1]).width;let px=X(tk[0]);px=Math.min(px,w-2-tw/2);px=Math.max(px,tw/2+2);x.fillText(tk[1],px,h-5);}
+  return{x,X,Y,pl,pw,pt,ph,w,h};
+}
+function dashed(f,y,color,label,above,left){
+  const{x}=f;x.save();x.strokeStyle=color;x.lineWidth=1;x.setLineDash([5,4]);x.beginPath();x.moveTo(f.pl,y);x.lineTo(f.pl+f.pw,y);x.stroke();x.restore();
+  if(label){x.fillStyle=color;x.textAlign=left?'left':'right';x.textBaseline='alphabetic';x.fillText(label,left?f.pl+4:f.pl+f.pw-4,above?y-4:y+12);}
+}
+function trace(f,data,x0,color,fill){
+  const{x}=f;if(data.length<2)return;
+  x.beginPath();
+  data.forEach((v,i)=>{const px=f.X(x0+i),py=f.Y(v);i?x.lineTo(px,py):x.moveTo(px,py);});
+  x.strokeStyle=color;x.lineWidth=1.6;x.lineJoin='round';x.stroke();
+  if(fill){x.lineTo(f.X(x0+data.length-1),f.Y(0));x.lineTo(f.X(x0),f.Y(0));x.closePath();x.globalAlpha=.16;x.fillStyle=color;x.fill();x.globalAlpha=1;}
+  const li=data.length-1;x.beginPath();x.arc(f.X(x0+li),f.Y(data[li]),3.2,0,7);x.fillStyle=color;x.fill();
+}
+function plot(c,o){
+  const bar=o.kind==='bar';
+  const f=frame(c,{x0:bar?-0.5:0,x1:bar?o.n-0.5:o.n-1,y0:0,y1:o.ymax,yt:o.yt,xt:o.xt});
+  if(!f)return;
+  const x=f.x;
+  (o.refs||[]).forEach(r=>dashed(f,f.Y(r.y),r.color,r.label,true,r.left));
+  if(bar){
+    const bw=f.pw/o.n*0.64;
+    o.vals.forEach((v,i)=>{if(v==null)return;x.fillStyle=o.colors?o.colors(i,v):C.accent;const y=f.Y(Math.min(v,o.ymax));x.fillRect(f.X(i)-bw/2,y,bw,f.Y(0)-y);});
+  }else{
+    x.beginPath();let pen=false,li=-1;
+    o.vals.forEach((v,i)=>{if(v==null){pen=false;return;}const px=f.X(i),py=f.Y(v);pen?x.lineTo(px,py):x.moveTo(px,py);pen=true;li=i;});
+    x.strokeStyle=C.accent;x.lineWidth=1.8;x.lineJoin='round';x.stroke();
+    if(li>=0){x.beginPath();x.arc(f.X(li),f.Y(o.vals[li]),3.2,0,7);x.fillStyle=C.accent;x.fill();}
+  }
+  if(o.proj){
+    x.save();x.setLineDash([5,4]);x.beginPath();
+    o.proj.forEach((p,k)=>{k?x.lineTo(f.X(p[0]),f.Y(p[1])):x.moveTo(f.X(p[0]),f.Y(p[1]));});
+    x.strokeStyle=C.warn;x.lineWidth=1.8;x.stroke();x.restore();
+    x.fillStyle=C.warn;x.font=MONO;x.textAlign='right';x.textBaseline='alphabetic';x.fillText('projection',f.pl+f.pw-4,f.pt+10);
+  }
+  (o.marks||[]).forEach(m=>{
+    const px=f.X(m.i),py=f.pt+f.ph;
+    x.beginPath();x.moveTo(px,py-9);x.lineTo(px-5,py);x.lineTo(px+5,py);x.closePath();x.fillStyle=m.ok?C.ok:C.crit;x.fill();
+  });
+  if(o.nowIdx!=null&&o.nowIdx>=-0.5&&o.nowIdx<=o.n-0.5){
+    const px=f.X(o.nowIdx);x.strokeStyle=C.ink;x.lineWidth=1;x.beginPath();x.moveTo(px,f.pt);x.lineTo(px,f.pt+f.ph);x.stroke();
+    x.fillStyle=C.ink;x.font=MONO;x.textAlign='center';x.textBaseline='alphabetic';x.fillText('now',px,f.pt+8);
+  }
+}
+const dayLbl=o=>{const d=new Date(T0+o*DAY);return d.getDate()+'/'+(d.getMonth()+1);};
+const CH={
+  adh(c){
+    const vals=[];
+    for(let o=-13;o<=0;o++){const a=adh(o,o);vals.push(a.tk+a.ms?a.pct:null);}
+    plot(c,{kind:'bar',n:14,vals,ymax:100,yt:[0,50,100],xt:[[0,dayLbl(-13)],[6,dayLbl(-7)],[13,'today']],colors:(i,v)=>v>=90?C.ok:v>=70?C.warn:C.crit});
+  },
+  tdaily(c){
+    const vals=[];
+    for(let o=-13;o<=-1;o++){const v=dayMean(dayAt(o));vals.push(v==null?null:+v.toFixed(1));}
+    const tl=trendLine();
+    const proj=tl?[[12,tl.at(-1)],[13,tl.at(0)],[14,tl.at(1)],[15,tl.at(2)]]:null;
+    const mx=Math.max(THR,...vals.filter(v=>v!=null),...(proj?proj.map(p=>p[1]):[0]));
+    const ymax=Math.max(8,Math.ceil(mx*1.15/2)*2);
+    plot(c,{kind:'line',n:16,vals:vals.concat([null,null,null]),ymax,yt:[0,ymax/2,ymax],xt:[[0,dayLbl(-13)],[6,dayLbl(-7)],[12,dayLbl(-1)],[15,'+2 d']],proj,refs:[{y:THR,color:C.warn,label:'detection threshold '+THR.toFixed(1)}]});
+  },
+  tdose(c){
+    const cv=doseCurve(),base=mean([cv[0],cv[1]].filter(v=>v!=null))||0;
+    const mx=Math.max(4,...cv.filter(v=>v!=null)),ymax=Math.ceil(mx*1.15/2)*2;
+    plot(c,{kind:'bar',n:6,vals:cv,ymax,yt:[0,ymax/2,ymax],xt:[[0,'0-1'],[1,'1-2'],[2,'2-3'],[3,'3-4'],[4,'4-5'],[5,'5+']],colors:(i,v)=>v>base*1.6?C.warn:C.accent});
+  },
+  thour(c){
+    const d=today(),vals=[];
+    for(let h=6;h<=22;h++)vals.push(d.hourly[h]!=null?d.hourly[h]:null);
+    const mx=Math.max(8,...vals.filter(v=>v!=null)),ymax=Math.ceil(mx*1.15/2)*2;
+    const marks=[];
+    for(const r of dosesOn(d))if(r.m.lev)marks.push({i:r.m.h-6.5,ok:r.st==='taken'});
+    plot(c,{kind:'bar',n:17,vals,ymax,yt:[0,ymax/2,ymax],xt:[[0,'06'],[3,'09'],[6,'12'],[9,'15'],[12,'18'],[15,'21']],colors:(i,v)=>v>THR?C.warn:C.accent,marks,nowIdx:hoursNow()-6.5,refs:[{y:THR,color:C.warn,label:'threshold'}]});
+  },
+  sleep(c){
+    const vals=[];for(let o=-13;o<=-1;o++)vals.push(dayAt(o).ci?dayAt(o).ci.sleep:null);
+    plot(c,{kind:'line',n:13,vals,ymax:9,yt:[0,3,6,9],xt:[[0,dayLbl(-13)],[6,dayLbl(-7)],[12,dayLbl(-1)]]});
+  },
+  off(c){
+    const vals=[];for(let o=-13;o<=-1;o++)vals.push(dayAt(o).ci?dayAt(o).ci.offH:null);
+    plot(c,{kind:'bar',n:13,vals,ymax:6,yt:[0,3,6],xt:[[0,dayLbl(-13)],[6,dayLbl(-7)],[12,dayLbl(-1)]],colors:(i,v)=>v>=S.rules.off.p?C.warn:C.accent,refs:[{y:S.rules.off.p,color:C.warn,label:'flag at '+S.rules.off.p+' h',left:true}]});
+  }
+};
+function drawStatic(){
+  readColors();
+  document.querySelectorAll('canvas[data-chart]').forEach(c=>{const fn=CH[c.dataset.chart];if(fn)fn(c);});
+}
+function drawGyro(){
+  const c=$('cGyro');if(!c)return;let m=0;for(const v of gyro)if(v>m)m=v;
+  const ymax=Math.max(60,Math.ceil(m*1.1/20)*20);
+  const f=frame(c,{x0:0,x1:299,y0:0,y1:ymax,yt:[0,ymax/2,ymax],xt:[[0,'-3 s'],[150,'-1.5 s'],[299,'now']]});
+  if(f)trace(f,gyro,300-gyro.length,C.accent,true);
+}
+function drawSpec(){
+  const c=$('cSpec');if(!c)return;const fmax=16;let m=0;for(let k=0;k<=10;k++)if(tr.mags[k]>m)m=tr.mags[k];
+  const ymax=Math.max(8,Math.ceil(m*1.2/4)*4);
+  const f=frame(c,{x0:0,x1:fmax,y0:0,y1:ymax,yt:[0,ymax/2,ymax],xt:[0,2,4,6,8,10,12,14].map(v=>[v,String(v)])});
+  if(!f)return;const{x}=f;
+  x.fillStyle=C['accent-soft'];x.fillRect(f.X(BAND_LO),f.pt,f.X(BAND_HI)-f.X(BAND_LO),f.ph);
+  x.fillStyle=C.accent;x.font=MONO;x.textAlign='center';x.fillText('3.5-7 Hz',(f.X(BAND_LO)+f.X(BAND_HI))/2,f.pt+10);
+  const bw=(SR/N)/fmax*f.pw*0.62;
+  for(let k=0;k<=10;k++){
+    const fq=k*SR/N,inb=fq>=BAND_LO&&fq<=BAND_HI,v=tr.mags[k];
+    x.fillStyle=inb?(tr.on?C.warn:C.accent):C['ink-2'];x.globalAlpha=inb?1:.45;
+    const y=f.Y(v);x.fillRect(f.X(fq)-bw/2,y,bw,f.Y(0)-y);
+  }
+  x.globalAlpha=1;x.fillStyle=C['ink-2'];x.textAlign='right';x.fillText('Hz',f.pl+f.pw,f.h-5);
+}
+function drawAcc(){
+  const c=$('cAcc');if(!c)return;
+  let am=0;for(const v of acc)if(v>am)am=v;const ym=Math.max(4,Math.ceil(am));
+  const f=frame(c,{x0:0,x1:399,y0:0,y1:ym,yt:ym>6?[0,Math.round(ym/2),ym]:Array.from({length:ym+1},(_,i)=>i),xt:[[0,'-4 s'],[200,'-2 s'],[399,'now']]});
+  if(!f)return;
+  dashed(f,f.Y(FALL.impact),C.crit,'impact '+FALL.impact+' g',true);
+  dashed(f,f.Y(FALL.free),C.warn,'free-fall '+FALL.free+' g',true);
+  trace(f,acc,400-acc.length,fs.state==='IDLE'?C.accent:(fs.state==='ALERT'?C.crit:C.warn),false);
+}
+function drawTrend(){
+  const c=$('cTrend');if(!c)return;let m=0;for(const v of trend)if(v>m)m=v;
+  const ymax=Math.max(10,Math.ceil(m*1.2/5)*5);
+  const f=frame(c,{x0:0,x1:239,y0:0,y1:ymax,yt:[0,ymax/2,ymax].map(v=>+v.toFixed(1)),xt:[[0,'-120 s'],[120,'-60 s'],[239,'now']]});
+  if(!f)return;
+  dashed(f,f.Y(THR),C.warn,'threshold '+THR.toFixed(1),true);
+  trace(f,trend,240-trend.length,C.accent,true);
+}
+
+/* ================= live widgets ================= */
+const setT=(id,v)=>{const e=$(id);if(e&&e.textContent!==String(v))e.textContent=v;};
+const setTile=(id,s)=>{const e=$(id);if(e)e.dataset.s=s;};
+function tremorText(){return tr.on?'Tremor now, near '+tr.freq.toFixed(1)+' Hz':'No tremor now';}
+function fallText(){return sim.alert?'Fall alert active':(fs.state==='IDLE'?'No fall':'Checking: '+fs.state);}
+function updateLive(){
+  document.querySelectorAll('[data-live]').forEach(e=>{
+    const k=e.dataset.live,v=k==='tremor'?tremorText():k==='fall'?fallText():'';
+    if(e.textContent!==v)e.textContent=v;
+    if(k==='tremor')e.className='pill '+(tr.on?'warn':'ok');
+    if(k==='fall')e.className='pill '+(sim.alert?'crit':fs.state==='IDLE'?'ok':'warn');
+  });
+  if(!$('vMode'))return;
+  const fall=sim.alert;
+  setT('vMode',fall?'FALL':'NORMAL');setT('vModeSub',fall?'Alert active':'Monitoring continuously');setTile('tileMode',fall?'crit':'ok');
+  setT('vTremor',tr.on?'Detected':'None');setT('vTremorSub',tr.on?'Peak near '+tr.freq.toFixed(1)+' Hz':'Below the energy threshold');setTile('tileTremor',tr.on?'warn':'ok');
+  setT('vFall',fall?'ALERT':'Clear');setT('vFallSub',fall?'Caregiver and care team notified':(fs.state==='IDLE'?'No fall detected':'Checking: '+fs.state));setTile('tileFall',fall?'crit':(fs.state==='IDLE'?'ok':'warn'));
+  const busy=!!sim.sc||fs.state!=='IDLE'||sim.live;
+  for(const id of ['bFall','bStumble','bSit'])if($(id))$(id).disabled=busy;
+  if($('bAck'))$('bAck').disabled=!fall;
+  for(const [id,s] of [['nIdle','IDLE'],['nFree','FREE_FALL'],['nConf','CONFIRM'],['nAlert','ALERT']])if($(id))$(id).classList.toggle('on',fs.state===s);
+  setT('rEnergy',tr.energy.toFixed(1));setT('rFreq',tr.energy>1?'about '+tr.freq.toFixed(1)+' Hz':'-');
+  if($('mEnergy')){$('mEnergy').style.width=(Math.min(1,tr.energy/(THR*3))*100)+'%';$('mEnergy').style.background=tr.on?'var(--warn)':'var(--accent)';$('mThr').style.left=(100/3)+'%';}
+  const buzz=sim.alert&&sim.buzzUntil;
+  if($('oled'))$('oled').innerHTML='PD MONITOR'+(buzz?'<span class="buzz">BUZZ</span>':'')+'\nMODE   '+(fall?'FALL':'NORMAL')+'\nTREMOR '+(tr.on?'YES '+tr.freq.toFixed(1)+'Hz':'NO')+'\nWiFi '+(navigator.onLine?'OK':'--')+'  Blynk '+blTag();
+  setT('pV0',fall?'FALL':'NORMAL');setT('pV1',tr.on?'1':'0');setT('pV2',fall?'1':'0');setT('pT',syncT?syncT.toLocaleTimeString([],{hour12:false}):'-');
+  setT('cS',cnt.s.toLocaleString());setT('cF',cnt.f.toLocaleString());setT('cT',cnt.t.toLocaleString());setT('cD',cnt.d.toLocaleString());
+  if(sim.live){setT('lRate',live.rate+' Hz');setT('lAcc',live.a.toFixed(2)+' g');setT('lGyr',live.gyro?Math.round(live.g)+' °/s':'no gyroscope');}
+  const ft=fs.state==='FREE_FALL'?(sim.t-fs.t0)*1000:0;
+  setT('nFreeT',fs.state==='FREE_FALL'?Math.round(ft)+' ms of 500':'');
+  const ct=fs.state==='CONFIRM'?(sim.t-fs.t0)*1000:0;
+  setT('nConfT',fs.state==='CONFIRM'?(ct/1000).toFixed(1)+' s of 3.0':'');
+  if($('mConf'))$('mConf').style.width=clamp(ct/3000,0,1)*100+'%';
+  const bz=sim.alert&&sim.buzzUntil?Math.max(0,sim.buzzUntil-sim.t):0;
+  setT('nAlertT',fs.state==='ALERT'?(bz>0?'Buzzer '+bz.toFixed(1)+' s left':'Waiting for acknowledgement'):'');
+  setT('hrsDose','Last levodopa dose: '+(lastLevAt(now())?hoursSinceLev(now()).toFixed(1)+' h ago':'none logged'));
+  const ul=$('sLog');
+  if(ul){
+    const sig=sLog.length+(sLog[0]?sLog[0].msg:'');
+    if(ul.dataset.sig!==sig){
+      ul.dataset.sig=sig;ul.textContent='';
+      for(const it of sLog){
+        const li=document.createElement('li'),t=document.createElement('time'),k=document.createElement('span'),m=document.createElement('span');
+        t.textContent=it.d.toLocaleTimeString([],{hour12:false});
+        k.className='k '+(it.kind==='info'?'':it.kind);k.textContent={info:'Info',ok:'OK',warn:'Tremor',crit:'Fall'}[it.kind]||it.kind;
+        m.textContent=it.msg;li.append(t,k,m);ul.append(li);
+      }
+    }
+  }
+  setT('blMsg',blMsg());
+}
+function setSrcMsg(t){const e=$('srcMsg');if(e)e.textContent=t;else toast(t);}
+/* ================= view helpers ================= */
+const pill=(t,k)=>'<span class="pill '+(k||'')+'">'+esc(t)+'</span>';
+const sevPill=s=>s==='urgent'?pill('Urgent','crit'):s==='review'?pill('Review','warn'):pill('Info','info');
+const locked=what=>'<div class="locked"><b>Not shared</b><span>'+esc(what)+'</span></div>';
+const cv=(chart,cls,label)=>'<canvas data-chart="'+chart+'" class="'+cls+'" role="img" aria-label="'+esc(label)+'"></canvas>';
+const panel=(title,sub,body,cls)=>'<div class="panel '+(cls||'')+'"><div class="panel-head"><h3>'+title+'</h3>'+(sub?'<p>'+sub+'</p>':'')+'</div>'+body+'</div>';
+const nudge=(text,kind,btns)=>'<div class="nudge '+(kind||'')+'"><p>'+text+'</p><div class="row">'+(btns||'')+'</div></div>';
+const btn=(label,act,data,cls)=>'<button class="'+(cls||'quiet')+'" data-act="'+act+'"'+(data?' '+data:'')+'>'+label+'</button>';
+const mins=ms=>{const m=Math.max(0,Math.round(ms/60e3));return m>=60?Math.floor(m/60)+' h '+(m%60)+' min':m+' min';};
+const signLabel=id=>(SIGNS.find(s=>s.id===id)||{t:id}).t;
+const nextAppt=()=>S.followups.filter(f=>f.status==='scheduled'&&f.due>now()).sort((a,b)=>a.due-b.due)[0];
+const newInstr=()=>S.instructions.filter(i=>i.isNew).length;
+const patientGaps=()=>gaps().filter(f=>f.status!=='requested');
+let fallSoft=false,editCi=false,toastT=0;
+
+function toast(msg){
+  const t=$('toast');if(!t)return;
+  t.textContent=msg;t.hidden=false;clearTimeout(toastT);
+  toastT=setTimeout(()=>{t.hidden=true;},4200);
+}
+
+/* ================= patient views ================= */
+function ciPanel(){
+  const d=today(),dr=S.draft,p=S.patient;
+  let res='';
+  if(S.ciResult){
+    const r=S.ciResult;
+    res='<div class="result '+(r.urgent?'urgent':r.n?'review':'')+'" role="status">'+(r.urgent
+      ?'<b>Your care team has been alerted.</b> If you are in danger, cannot breathe or have been badly hurt, call 112 now. Do not wait for a reply from the app.'
+      :r.n?'<b>Your care team has been told.</b> They will review what you reported. If it gets worse, call the clinic.'
+      :'<b>Check-in saved.</b> Thank you. Your care team can see it if you share check-ins with them.')+'</div>';
+  }
+  if(d.ci&&!editCi){
+    const c=d.ci;
+    return panel('Daily check-in','Sent at '+fT(c.at),res+'<table class="kv"><tr><th>Moving</th><td>'+(c.state==='On'?'Moving well':'Slow or stiff')+'</td></tr><tr><th>Mood</th><td>'+['','Low','Down','Okay','Good','Great'][c.mood]+'</td></tr><tr><th>Sleep</th><td>'+(c.sleep!=null?c.sleep+' h':'-')+'</td></tr><tr><th>Stiffness</th><td>'+c.stiff+' of 4</td></tr><tr><th>Warning signs</th><td>'+(c.signs.length?c.signs.length+' reported':'None')+'</td></tr></table><div class="row" style="margin-top:12px">'+btn('Change my answers','ciEdit')+'</div>');
+  }
+  const ch=(name,val,label,cur)=>'<label class="choice"><input type="radio" name="'+name+'" data-d="'+name+'" value="'+val+'"'+(String(cur)===String(val)?' checked':'')+'><span>'+label+'</span></label>';
+  return panel('Daily check-in','About a minute',res+
+    '<fieldset class="fieldset"><legend class="label" style="margin-bottom:8px">How are you moving right now?</legend><div class="chips">'+ch('state','On','Moving well',dr.state)+ch('state','Off','Slow or stiff',dr.state)+'</div></fieldset>'+
+    '<fieldset class="fieldset"><legend class="label" style="margin-bottom:8px">Mood today</legend><div class="chips">'+['Low','Down','Okay','Good','Great'].map((l,i)=>ch('mood',i+1,l,dr.mood)).join('')+'</div></fieldset>'+
+    '<div class="field"><label class="label" for="ciSleep">Hours slept last night</label><input type="number" id="ciSleep" data-d="sleep" min="0" max="14" step="0.5" inputmode="decimal" value="'+esc(dr.sleep)+'" placeholder="For example 6.5"></div>'+
+    '<div class="field"><div class="field-row"><label class="label" for="ciStiff">Stiffness</label><b class="mono"><span id="stiffV">'+dr.stiff+'</span> of 4</b></div><input type="range" id="ciStiff" data-d="stiff" min="0" max="4" step="1" value="'+dr.stiff+'"></div>'+
+    '<fieldset class="fieldset"><legend class="label" style="margin-bottom:8px">Any of these happening now?</legend><div class="checks">'+SIGNS.map(s=>'<label><input type="checkbox" data-d="sign" value="'+s.id+'"'+(dr.signs.includes(s.id)?' checked':'')+'><span>'+esc(s.t)+'</span></label>').join('')+'</div></fieldset>'+
+    '<div class="field"><label class="label" for="ciNote">Anything else you want your care team to know</label><textarea id="ciNote" data-d="note" placeholder="Optional">'+esc(dr.note)+'</textarea></div>'+
+    '<p class="err" id="ciErr" hidden>Choose how you are moving and your mood first.</p>'+
+    '<div class="row">'+btn('Send check-in','ciSubmit',null,'primary')+'</div>'+
+    '<p class="hint">Reporting a warning sign alerts your care team. In an emergency call 112.</p>');
+}
+function vToday(){
+  const p=S.patient,d=today(),rows=dosesOn(d);
+  const nx=rows.find(r=>r.st==='due'||r.st==='overdue')||rows.find(r=>r.st==='upcoming');
+  const hr=hoursNow(),greet=hr<12?'Good morning':hr<17?'Good afternoon':'Good evening';
+  let nud='';
+  if(!d.ci)nud+=nudge('Your daily check-in takes about a minute. It helps your care team see how you are doing between visits.','info');
+  for(const f of patientGaps().slice(0,2))nud+=nudge('<b>'+esc(f.title)+'.</b> '+esc(gapText(f)),'',(f.type==='test'?btn('I have done this','fuDone','data-id="'+f.id+'"'):'')+btn(f.type==='test'?'Ask for a new date':'Ask for a new time','fuReq','data-id="'+f.id+'"'));
+  const ni=newInstr();
+  if(ni)nud+=nudge(esc(p.clinician)+' sent you '+ni+' new instruction'+(ni>1?'s':'')+'.','info',btn('Read','tab','data-v="plan"'));
+  let next;
+  if(nx){
+    const due=nx.st!=='upcoming';
+    next='<div class="next '+(due?'due':'')+'"><span class="label">'+(due?'Due now':'Next dose')+'</span><div class="big-t">'+fT(nx.sched)+' · '+esc(nx.m.name)+'</div><p class="muted small">'+esc(nx.m.dose)+(due?'':' · in '+mins(nx.sched-now()))+'</p>'+(due?'<div class="row" style="margin-top:6px">'+btn('I took this dose','dose','data-id="'+nx.m.id+'"','primary')+'</div>':'')+'</div>';
+  }else next='<div class="next"><span class="label">Doses</span><div class="big-t">All done for today</div></div>';
+  const list=rows.map(r=>{
+    let right;
+    if(r.st==='taken')right=pill('Taken '+fT(r.at),'ok');
+    else if(r.st==='upcoming')right=pill('Later','info');
+    else right=btn(r.st==='missed'?'Log as taken':'I took it','dose','data-id="'+r.m.id+'"')+(r.st==='missed'?'':'');
+    const tag=r.st==='missed'?' '+pill('Missed','crit'):r.st==='overdue'?' '+pill('Overdue','warn'):'';
+    return '<div class="dose"><span class="t">'+fT(r.sched)+'</span><div><b>'+esc(r.m.name)+'</b>'+tag+'<span class="d">'+esc(r.m.dose)+'</span></div><div>'+right+'</div></div>';
+  }).join('');
+  const ins=doseInsight(),a=adh(-6,0);
+  return '<div class="page-head"><h1>'+greet+', '+esc(p.first)+'</h1><p>'+fD(now())+'. Your plan for today, in one place.</p></div>'+
+    (nud?'<div class="nudges">'+nud+'</div>':'')+
+    '<div class="cols"><div class="stack">'+
+      panel('Your doses today','Mark each dose as you take it',next+list)+
+      panel('Your tremor today','From your wearable, one bar per hour','<div class="row" style="margin-bottom:8px"><span class="pill" data-live="tremor"></span><span class="pill" data-live="fall"></span></div>'+cv('thour','c-170','Tremor by hour today with dose times marked')+'<p class="hint">Triangles mark levodopa doses: green taken, red not logged.'+(ins?' Your tremor tends to rise about '+ins.hours+' hours after a levodopa dose.':'')+'</p>')+
+    '</div><div class="stack">'+
+      ciPanel()+
+      panel('Doses logged, last 14 days',a.pct+'% this week',cv('adh','c-120','Percent of doses logged each day for 14 days'))+
+    '</div></div>';
+}
+function vPlan(){
+  const p=S.patient,c=S.circ,ins=doseInsight(),items=[];
+  if(c.livesAlone)items.push([ 'You live alone','Wear the sensor band through the day. Fall alerts go to '+p.cgFirst+' and to your care team.'+(shared('cg','sensor')?'':' You have turned off sharing with '+p.cgFirst+', so only your care team sees alerts.')]);
+  if(c.stairs)items.push(['You use stairs every day',ins?'Your tremor tends to rise about '+ins.hours+' hours after a levodopa dose. Plan stair trips for the first two hours after a dose, and ask your physiotherapist about stair safety.':'Plan stair trips for when your doses are working, and ask your physiotherapist about stair safety.']);
+  if(c.eveningsOnly)items.push([p.cgFirst+' is only free in the evenings','Do your physiotherapy exercises around 17:30, when '+p.cgFirst+' is home and can be nearby.']);
+  if(c.hardTravel)items.push(['Travel to the clinic is hard','Your neurology review is booked as a video call. Ask the clinic whether your blood sample can be collected at home.']);
+  if(c.smallPrint)items.push(['Small print is hard to read','Text in this app is set to large.']);
+  const circ=(k,l)=>'<label class="switch"><input type="checkbox" data-circ="'+k+'"'+(c[k]?' checked':'')+'> '+esc(l)+'</label>';
+  return '<div class="page-head"><h1>Your care plan</h1><p>Instructions from your care team, adapted to how you live. Nothing here replaces what your doctor tells you.</p></div>'+
+  '<div class="cols"><div class="stack">'+
+    panel('From your care team','Newest first','<ul class="list">'+S.instructions.slice().sort((a,b)=>b.date-a.date).map(i=>'<li><div class="li-head"><span>'+pill(i.cat,'info')+(i.isNew?' '+pill('New','crit'):'')+'</span><span class="muted small">'+esc(i.from)+', '+fD(i.date)+'</span></div><p>'+esc(i.text)+'</p></li>').join('')+'</ul>')+
+    panel('Adapted for you','Suggested by the app from what you told us. Confirm with your care team.',items.length?'<ul class="list">'+items.map(x=>'<li><span class="because">Because: '+esc(x[0])+'</span><p>'+esc(x[1])+'</p></li>').join('')+'</ul>':'<p class="muted">Tell us about your day on the right and the plan will adapt.</p>')+
+  '</div><div class="stack">'+
+    panel('About your situation','Change these any time','<div class="checks" style="gap:12px">'+circ('livesAlone','I live alone')+circ('stairs','I use stairs every day')+circ('eveningsOnly',p.cgFirst+' is only free in the evenings')+circ('hardTravel','Travelling to the clinic is hard')+circ('smallPrint','Small print is hard to read')+'</div>')+
+    panel('Get help when it matters','Warning signs to act on','<ul class="list">'+SIGNS.map(s=>'<li><div class="li-head"><span>'+esc(s.t)+'</span>'+(s.u?pill('Call 112','crit'):pill('Tell the clinic today','warn'))+'</div></li>').join('')+'</ul><p class="hint">Reporting a sign in your daily check-in alerts your care team. It does not replace calling for emergency help.</p>')+
+  '</div></div>';
+}
+function vFollow(){
+  const g=gaps(),rest=S.followups.filter(f=>!g.includes(f));
+  const row=f=>{
+    let right='';
+    if(f.status==='requested')right=pill('Waiting for clinic','info');
+    else if(f.status==='done')right=pill(f.selfDone?'Done, you reported':'Done','ok');
+    else if(f.status==='scheduled')right=pill('Booked','info');
+    else right=(f.type==='test'?btn('I have done this','fuDone','data-id="'+f.id+'"'):'')+btn(f.type==='test'?'Ask for a new date':'Ask for a new time','fuReq','data-id="'+f.id+'"');
+    const sub=g.includes(f)?'<span class="muted small">'+esc(gapText(f))+'</span>':'<span class="muted small">'+fDT(f.due)+' · '+esc(f.who)+'</span>';
+    return '<li><div class="fu"><div><b>'+esc(f.title)+'</b><br>'+sub+'</div><div class="row">'+right+'</div></div></li>';
+  };
+  const up=rest.filter(f=>f.status==='scheduled').sort((a,b)=>a.due-b.due),done=rest.filter(f=>f.status==='done').sort((a,b)=>b.due-a.due);
+  return '<div class="page-head"><h1>Follow-ups</h1><p>Appointments and tests after your hospital stay. Anything missed or overdue shows first so it does not slip.</p></div>'+
+  '<div class="cols even"><div class="stack">'+
+    panel('Needs attention',g.length+' open',g.length?'<ul class="list">'+g.map(row).join('')+'</ul>':'<p class="muted">Nothing is overdue.</p>')+
+    panel('Coming up','',up.length?'<ul class="list">'+up.map(row).join('')+'</ul>':'<p class="muted">Nothing booked yet.</p>')+
+  '</div><div class="stack">'+panel('Completed','',done.length?'<ul class="list">'+done.map(row).join('')+'</ul>':'<p class="muted">Nothing completed yet.</p>')+'</div></div>';
+}
+function vMonitor(){
+  const b=(id,act,v,l,s)=>'<button id="'+id+'" data-act="'+act+'"'+(v?' data-v="'+v+'"':'')+'>'+l+(s?'<small>'+s+'</small>':'')+'</button>';
+  return '<div class="page-head"><h1>Sensor monitor</h1><p>The sensing layer. Tremor and fall events from here feed dose timing, the care team\'s review queue and caregiver alerts.</p></div>'+
+  '<div class="cols"><div class="stack">'+
+    '<div class="tiles"><div class="tile" id="tileMode" data-s="ok"><span class="label">System mode · V0</span><span class="val" id="vMode">NORMAL</span><span class="sub" id="vModeSub">Monitoring continuously</span></div><div class="tile" id="tileTremor" data-s="ok"><span class="label">Tremor status · V1</span><span class="val" id="vTremor">None</span><span class="sub" id="vTremorSub"></span></div><div class="tile" id="tileFall" data-s="ok"><span class="label">Fall alert · V2</span><span class="val" id="vFall">Clear</span><span class="sub" id="vFallSub">No fall detected</span></div></div>'+
+    panel('Tremor detection','FFT over 64 samples, Hamming window, energy summed in the 3.5 to 7 Hz band','<div class="charts"><div class="chart-box"><span class="label">Gyroscope magnitude, last 3 s (°/s)</span><canvas id="cGyro" class="c-170" role="img" aria-label="Live gyroscope magnitude"></canvas></div><div class="chart-box"><span class="label">Frequency spectrum (°/s per bin)</span><canvas id="cSpec" class="c-170" role="img" aria-label="Live frequency spectrum with the tremor band shaded"></canvas></div></div><div class="readout"><span>Band energy <b id="rEnergy">0.0</b> °/s</span><span>Threshold <b id="rThr">'+THR.toFixed(1)+'</b> °/s</span><span>Dominant frequency <b id="rFreq">-</b></span></div><div class="meter" aria-hidden="true"><i id="mEnergy"></i><u id="mThr"></u></div>')+
+    panel('Fall detection','State machine checked every 20 ms','<div class="states"><div class="node" id="nIdle"><b>IDLE</b><span>Watching acceleration. Moves to FREE_FALL below 0.35 g.</span><em id="nIdleT"></em></div><div class="node" id="nFree"><b>FREE_FALL</b><span>Needs impact within 100 to 500 ms: above 2.5 g and above 120 °/s.</span><em id="nFreeT"></em></div><div class="node" id="nConf"><b>CONFIRM</b><span>3 s confirmation. The patient must stay down.</span><em id="nConfT"></em><div class="meter"><i id="mConf"></i></div></div><div class="node crit" id="nAlert"><b>ALERT</b><span>Buzzer for 6 s, caregiver and care team notified.</span><em id="nAlertT"></em></div></div><span class="label" style="display:block;margin-bottom:6px">Acceleration magnitude, last 4 s (g)</span><canvas id="cAcc" class="c-190" role="img" aria-label="Live acceleration magnitude"></canvas>')+
+    panel('Tremor energy, last 2 minutes','One point every 500 ms','<canvas id="cTrend" class="c-120" role="img" aria-label="Tremor band energy over two minutes"></canvas>')+
+    panel('Sensor event log','Newest first','<ul class="log" id="sLog" aria-live="polite"></ul>')+
+  '</div><aside class="stack">'+
+    panel('Data source','','<div class="seg" role="group" aria-label="Data source"><button data-act="srcLive" aria-pressed="'+sim.live+'">Phone sensors</button><button data-act="srcSim" aria-pressed="'+!sim.live+'">Simulator</button></div><p class="hint" id="srcMsg" style="margin-top:0">'+(sim.live?'Phone sensors live.':'Simulator running. Phone sensors need this file hosted over HTTPS and opened on a phone. Keep the screen on and the page in front.')+'</p><table class="kv" '+(sim.live?'':'hidden')+' style="margin-top:10px"><tr><th>Sensor rate</th><td id="lRate">-</td></tr><tr><th>Acceleration</th><td id="lAcc">-</td></tr><tr><th>Rotation</th><td id="lGyr">-</td></tr></table>'+
+      '<div class="field" style="margin-top:14px"><div class="field-row"><label for="sThr">Tremor threshold</label><b class="mono" id="sThrV">'+THR.toFixed(1)+' °/s</b></div><input type="range" id="sThr" data-sim="thr" min="0.5" max="15" step="0.5" value="'+THR+'"><span class="hint" style="margin:0">Lower is more sensitive.</span></div><div class="field"><label for="fMode" class="label">Fall thresholds</label><select id="fMode" data-sim="fmode"><option value="std"'+(fallSoft?'':' selected')+'>Project report values</option><option value="soft"'+(fallSoft?' selected':'')+'>Relaxed, for testing over a bed</option></select></div>')+
+    panel('Simulator controls',sim.live?'Off while phone sensors are live':'','<div class="field"><label class="switch"><input type="checkbox" id="tAuto" data-sim="auto"'+(sim.auto?' checked':'')+(sim.live?' disabled':'')+'> Tremor follows dose timing</label><span class="hint" style="margin:0" id="hrsDose"></span></div><div class="field"><label class="switch"><input type="checkbox" id="tOn" data-sim="tOn"'+(sim.tremorOn?' checked':'')+(sim.auto||sim.live?' disabled':'')+'> Patient has a tremor</label></div><div class="field"><div class="field-row"><label for="tF">Tremor frequency</label><b class="mono" id="tFv">'+sim.f.toFixed(1)+' Hz</b></div><input type="range" id="tF" data-sim="tF" min="2" max="10" step="0.1" value="'+sim.f.toFixed(1)+'"'+(sim.auto||sim.live?' disabled':'')+'></div><div class="field"><div class="field-row"><label for="tA">Tremor amplitude</label><b class="mono" id="tAv">'+Math.round(sim.A)+' °/s</b></div><input type="range" id="tA" data-sim="tA" min="0" max="30" step="1" value="'+Math.round(sim.A)+'"'+(sim.auto||sim.live?' disabled':'')+'></div><span class="label" style="display:block;margin-bottom:8px">Motion events</span><div class="btns">'+b('bFall','sc','fall','Simulate a fall','Free-fall, impact, then lying still')+b('bStumble','sc','stumble','Stumble and recover','No alert if the patient gets up')+b('bSit','sc','sit','Sit down quickly','Hard sit, no free-fall. Ignored.')+b('bAck','ack',null,'Acknowledge alert','')+'<button id="bSound" data-act="sound" aria-pressed="'+sim.sound+'">Buzzer sound: '+(sim.sound?'on':'off')+'</button></div>')+
+    panel('Blynk cloud','Optional','<div class="field"><label for="bToken" class="label">Device auth token</label><input type="password" id="bToken" autocomplete="off" placeholder="Paste your Blynk token" value="'+esc(bl.token)+'"></div><div class="field"><label for="bHost" class="label">Server</label><input type="text" id="bHost" class="mono" value="'+esc(bl.host)+'" autocomplete="off" autocapitalize="off" spellcheck="false"></div><button data-act="blSave">Save and send</button><p class="hint" id="blMsg">'+esc(blMsg())+'</p>')+
+    '<details class="panel"><summary>Wearable device view</summary><div class="oled" id="oled" aria-label="Simulated 128 by 64 OLED display"></div><table class="kv" style="margin-top:12px"><tr><th>V0 System mode</th><td id="pV0">NORMAL</td></tr><tr><th>V1 Tremor status</th><td id="pV1">0</td></tr><tr><th>V2 Fall alert</th><td id="pV2">0</td></tr><tr><th>Last sync</th><td id="pT">-</td></tr><tr><th>Sampling, 10 ms</th><td id="cS">0</td></tr><tr><th>Fall check, 20 ms</th><td id="cF">0</td></tr><tr><th>FFT, 200 ms</th><td id="cT">0</td></tr><tr><th>Display and cloud, 500 ms</th><td id="cD">0</td></tr></table></details>'+
+  '</aside></div>';
+}
+function vPrivacy(){
+  const p=S.patient,rows=CATS.map(c=>'<div>'+esc(c.t)+'</div><div class="c"><input type="checkbox" data-consent="care.'+c.id+'" aria-label="Share '+esc(c.t)+' with the care team"'+(S.consent.care[c.id]?' checked':'')+'></div><div class="c"><input type="checkbox" data-consent="cg.'+c.id+'" aria-label="Share '+esc(c.t)+' with '+esc(p.cgFirst)+'"'+(S.consent.cg[c.id]?' checked':'')+'></div>').join('');
+  const log=S.audit.filter(a=>a.who!==p.name);
+  return '<div class="page-head"><h1>Privacy and sharing</h1><p>You decide who sees what. Only people you authorise can view your data, and every view is recorded below.</p></div>'+
+  '<div class="cols even"><div class="stack">'+
+    panel('Who can see your data','Changes apply straight away','<div class="matrix"><div class="h">Shared with</div><div class="h c">'+esc(p.clinician)+' and team</div><div class="h c">'+esc(p.caregiver)+'</div>'+rows+'</div><p class="hint">Your care team uses medication and safety data to decide when to call you. Turning these off limits what they can do for you.</p>')+
+  '</div><div class="stack">'+
+    panel('Who looked at your data','Most recent first','<ul class="audit">'+(log.length?log.map(a=>'<li><time>'+fT(a.ts)+'</time><span><b>'+esc(a.who)+'</b> '+esc(a.what)+'</span></li>').join(''):'<li><span class="muted">No one has opened your data yet.</span></li>')+'</ul>')+
+  '</div></div>';
+}
+
+/* ================= caregiver view ================= */
+function vCaregiver(){
+  const p=S.patient,a=adh(-6,0),sh=k=>shared('cg',k),t=today(),lastFall=S.falls[S.falls.length-1];
+  const rows=dosesOn(t),taken=rows.filter(r=>r.st==='taken').length,due=rows.filter(r=>r.st!=='upcoming').length;
+  const tile=(l,v,s,k)=>'<div class="tile" data-s="'+(k||'none')+'"><span class="label">'+l+'</span><span class="val">'+v+'</span><span class="sub">'+s+'</span></div>';
+  const tiles=[
+    sh('meds')?tile('Doses today',taken+' of '+due,'logged so far',taken<due?'warn':'ok'):tile('Doses today','Not shared','',''),
+    sh('meds')?tile('Doses this week',a.pct+'%','logged',a.pct>=90?'ok':a.pct>=80?'warn':'crit'):tile('Doses this week','Not shared','',''),
+    sh('sensor')?tile('Falls in 14 days',String(S.falls.length),S.falls.length?'Last: '+fDT(lastFall.ts):'None',S.falls.length?'warn':'ok'):tile('Falls','Not shared','',''),
+    sh('follow')?tile('Needs follow-up',String(gaps().length),gaps().length?'open items':'Nothing overdue',gaps().length?'warn':'ok'):tile('Follow-ups','Not shared','','')
+  ].join('');
+  const med=sh('meds')?panel('Medication','Doses logged each day',cv('adh','c-150','Percent of doses logged each day')+'<p class="hint">'+a.ms+' doses were not logged in the last 7 days, '+a.lm+' of them levodopa.</p>'):locked(p.first+' has not shared medication data with you.');
+  const sen=sh('sensor')?panel('Wearable','Live from the sensor','<div class="row"><span class="pill" data-live="tremor"></span><span class="pill" data-live="fall"></span></div><p class="hint">'+(S.falls.length?'Last fall: '+fDT(lastFall.ts)+(lastFall.ack?', acknowledged by '+esc(lastFall.ackBy)+'.':', waiting for acknowledgement.'):'No falls recorded.')+'</p>'):locked(p.first+' has not shared sensor data with you.');
+  const c=dayAt(-1).ci,ci=sh('checkins')?panel('Latest check-in','Yesterday','<table class="kv"><tr><th>Moving</th><td>'+(c.state==='On'?'Moving well':'Slow or stiff')+'</td></tr><tr><th>Sleep</th><td>'+c.sleep+' h</td></tr><tr><th>Stiffness</th><td>'+c.stiff+' of 4</td></tr><tr><th>Off-time</th><td>'+c.offH+' h</td></tr></table>'+(c.note?'<p class="hint">"'+esc(c.note)+'"</p>':'')):locked(p.first+' has not shared daily check-ins with you. They can change this under Privacy.');
+  const help=[],na=nextAppt();
+  if(sh('follow')&&na)help.push('Be there for the next appointment: '+na.title+', '+fDT(na.due)+'.');
+  if(sh('follow')&&gaps().length)help.push('Help '+p.first+' rebook or complete: '+gaps().map(f=>f.title.toLowerCase()).join('; ')+'.');
+  if(sh('meds')&&adh(-2,0).lm>=2)help.push(p.first+' has missed '+adh(-2,0).lm+' levodopa doses in 3 days. A friendly call or a pill-box check may help.');
+  if(S.circ.eveningsOnly)help.push('Be nearby for '+p.first+'\'s exercises around 17:30.');
+  const fu=sh('follow')?panel('Follow-ups','',(na?'<p><b>Next:</b> '+esc(na.title)+', '+fDT(na.due)+'</p>':'')+(gaps().length?'<ul class="list">'+gaps().map(f=>'<li><b>'+esc(f.title)+'</b><span class="muted small">'+esc(gapText(f))+'</span></li>').join('')+'</ul>':'<p class="muted">Nothing is overdue.</p>')):locked(p.first+' has not shared follow-ups with you.');
+  return '<div class="page-head"><h1>'+esc(p.cgFirst)+', here is how '+esc(p.first)+' is doing</h1><p>You see what '+esc(p.first)+' chose to share. He can change this at any time.</p></div>'+
+    '<div class="tiles" style="margin-bottom:16px">'+tiles+'</div>'+
+    '<div class="cols even"><div class="stack">'+med+sen+'</div><div class="stack">'+ci+fu+panel('How you can help','',help.length?'<ul class="list">'+help.map(h=>'<li>'+esc(h)+'</li>').join('')+'</ul>':'<p class="muted">Nothing needs you right now.</p>')+'</div></div>';
+}
+
+/* ================= care team views ================= */
+function summaryText(){
+  const p=S.patient,a=adh(-6,0),a14=adh(-13,0),rise=tRise(),ins=doseInsight(),cs=shared.bind(null,'care'),L=[];
+  L.push('Visit summary: '+p.name+', '+p.age+'. '+p.dx+'.');
+  L.push('Period: '+fD(T0-13*DAY)+' to '+fD(now())+' (14 days). Prepared for '+p.clinician+'.');
+  L.push('');
+  if(cs('meds')){
+    L.push('MEDICATION');
+    L.push('- Doses logged in the last 7 days: '+a.pct+'% ('+a.tk+' of '+(a.tk+a.ms)+'). Levodopa doses missed: '+a.lm+'.');
+    L.push('- Over 14 days: '+a14.pct+'% logged.');
+  }
+  if(cs('sensor')){
+    L.push('');L.push('TREMOR AND FALLS');
+    L.push('- Tremor index, 7-day average: '+tIdx(-7,-1).toFixed(1)+' °/s, '+(rise>=0?'up ':'down ')+Math.abs(rise)+'% on the previous week.');
+    if(ins)L.push('- Tremor typically rises from about '+ins.hours+' h after a levodopa dose.');
+    L.push('- Falls in 14 days: '+S.falls.length+(S.falls.length?' (latest '+fDT(S.falls[S.falls.length-1].ts)+').':'.'));
+  }
+  if(cs('checkins')){
+    const sl=ciAvg('sleep',-7,-1),sl0=ciAvg('sleep',-14,-8),of=ciAvg('offH',-7,-1),st=ciAvg('stiff',-7,-1);
+    L.push('');L.push('CHECK-INS');
+    L.push('- Sleep averaging '+sl.toFixed(1)+' h, previous week '+sl0.toFixed(1)+' h. Stiffness '+st.toFixed(1)+' of 4. Off-time '+of.toFixed(1)+' h a day.');
+    const notes=S.days.filter(d=>d.off>=-6&&d.ci&&d.ci.note).map(d=>'- '+fD(T0+d.off*DAY)+': '+d.ci.note);
+    if(notes.length){L.push('Patient notes:');L.push(...notes);}
+  }
+  if(cs('follow')){
+    L.push('');L.push('FOLLOW-UP');
+    const g=gaps();
+    if(g.length)for(const f of g)L.push('- '+f.title+': '+gapText(f));else L.push('- No gaps.');
+    const na=nextAppt();if(na)L.push('- Next: '+na.title+', '+fDT(na.due)+'.');
+  }
+  L.push('');
+  L.push('Open flags awaiting review: '+openFlags().length+'.');
+  L.push('Generated from data '+p.first+' chose to share. For clinical review. Not a diagnosis.');
+  return L.join('\n');
+}
+function vTeamOverview(){
+  const p=S.patient,at=attention(),a=adh(-6,0),cs=k=>shared('care',k);
+  const lvl=l=>pill(l,l==='High'?'crit':l==='Elevated'?'warn':'ok');
+  const na=nextAppt(),lastCi=dayAt(0).ci?'Today':dayAt(-1).ci?'Yesterday':'Earlier';
+  const mine='<tr class="me"><td><b>'+esc(p.name)+', '+p.age+'</b></td><td>'+lvl(at.level)+'</td><td class="num">'+(cs('meds')?a.pct+'%':'Not shared')+'</td><td class="num">'+openFlags().length+'</td><td class="num">'+(cs('follow')?gaps().length:'-')+'</td><td>'+(cs('checkins')?lastCi:'Not shared')+'</td><td>'+(cs('follow')&&na?fD(na.due):'-')+'</td></tr>';
+  const others=OTHERS.map(o=>'<tr><td>'+esc(o.n)+'</td><td>'+lvl(o.att)+'</td><td class="num">'+o.a+'%</td><td class="num">'+o.fl+'</td><td class="num">'+o.gaps+'</td><td>'+esc(o.ci)+'</td><td>'+esc(o.next)+'</td></tr>').join('');
+  const fac=at.factors.length?'<ul class="factors">'+at.factors.map(f=>'<li><span>'+esc(f[0])+'</span><b>+'+f[1]+'</b></li>').join('')+'</ul>':'<p class="muted">Nothing is pulling this score up.</p>';
+  return '<div class="page-head"><h1>Continuity of care</h1><p>Who needs attention first, and why. '+esc(p.name)+' is live. The other rows are sample patients.</p></div>'+
+  panel('Worklist','Sorted by what the rules found','<div class="scroll-x"><table class="t"><thead><tr><th>Patient</th><th>Attention</th><th>Doses, 7 d</th><th>Open flags</th><th>Gaps</th><th>Last check-in</th><th>Next visit</th></tr></thead><tbody>'+mine+others+'</tbody></table></div>')+
+  '<div class="cols" style="margin-top:16px"><div class="stack">'+
+    panel('Visit summary for '+esc(p.first),'Built from shared data','<pre class="summary" id="sumTxt">'+esc(summaryText())+'</pre><div class="row" style="margin-top:12px">'+btn('Copy summary','copySum',null,'primary')+btn('Open review queue','tab','data-v="queue"')+'</div>')+
+  '</div><div class="stack">'+
+    panel('Attention level','Rule-based and explainable','<div class="score"><span class="n" style="color:var(--'+(at.level==='High'?'crit':at.level==='Elevated'?'warn':'ok')+')">'+at.score+'</span><div>'+lvl(at.level)+'<p class="small muted" style="margin-top:6px">Guides who to look at first. It does not diagnose.</p></div></div>'+fac)+
+    panel('Wearable right now','Live','<div class="row"><span class="pill" data-live="tremor"></span><span class="pill" data-live="fall"></span></div><p class="hint">Last levodopa dose logged '+(lastLevAt(now())?mins(now()-lastLevAt(now()))+' ago':'none')+'.</p>')+
+  '</div></div>';
+}
+function vQueue(){
+  const rank={urgent:0,review:1,info:2},list=S.flags.filter(f=>f.event||f.active).sort((a,b)=>(a.status==='new'?0:1)-(b.status==='new'?0:1)||rank[a.sev]-rank[b.sev]||b.ts-a.ts);
+  const cards=list.map(f=>{
+    const done=f.status==='reviewed';
+    return '<div class="flag '+f.sev+(done?' done':'')+'"><div class="li-head"><span>'+sevPill(f.sev)+' <b>'+esc(f.title)+'</b></span>'+(done?pill('Reviewed','ok'):pill('New','crit'))+'</div><p class="small">'+esc(f.why)+'</p><div class="meta"><span>Source: '+esc(f.src)+'</span><span>'+fDT(f.ts)+'</span></div>'+
+      (done?'<p class="small"><b>Note:</b> '+esc(f.note||'None')+'</p><div class="row">'+btn('Reopen','flagReopen','data-k="'+esc(f.key)+'"')+'</div>':'<div class="field" style="margin:0"><label class="label" for="note-'+esc(f.key)+'">Note for the record</label><input type="text" id="note-'+esc(f.key)+'" placeholder="For example: phoned patient, adjusted plan"></div><div class="row">'+btn('Mark as reviewed','flagReview','data-k="'+esc(f.key)+'"','primary')+'</div>')+'</div>';
+  }).join('');
+  return '<div class="page-head"><h1>Review queue</h1><p>Flags raised by predefined rules. Each one needs a clinician to review it. The app suggests nothing about treatment.</p></div><div class="flags">'+(cards||'<p class="muted">No flags.</p>')+'</div>';
+}
+function vTrends(){
+  const ins=doseInsight(),cs=k=>shared('care',k),tl=trendLine();
+  const t1=cs('sensor')?panel('Tremor index by day','Dashed line projects the last week\'s slope forward 3 days',cv('tdaily','c-190','Daily tremor index for 13 days with a 3 day projection')+'<p class="hint">'+(tl?'Projection if the pattern continues: about '+tl.at(2).toFixed(1)+' °/s in two days. It is a straight-line estimate, not a forecast model.':'')+'</p>'):locked('Tremor and fall data is not shared with the care team.');
+  const t2=cs('sensor')?panel('Tremor and dose timing','Average tremor index by hours since the last levodopa dose',cv('tdose','c-190','Average tremor index by hours since the last dose')+(ins?'<p class="insight" style="margin-top:10px">Tremor rises from about <b>'+ins.hours+' hours</b> after a levodopa dose, from around '+ins.base.toFixed(1)+' to '+ins.peak.toFixed(1)+' °/s. This may point to wearing-off. A clinician should judge.</p>':'')):'';
+  const t3=cs('meds')?panel('Doses logged per day','Green 90% or more, amber 70 to 89%, red below 70%',cv('adh','c-170','Percent of doses logged each day')):locked('Medication data is not shared with the care team.');
+  const t4=cs('checkins')?panel('Sleep, hours','Patient reported',cv('sleep','c-150','Hours slept each night'))+panel('Off-time, hours','Patient reported',cv('off','c-150','Reported off-time hours each day')):locked('Check-in data is not shared with the care team.');
+  return '<div class="page-head"><h1>Trends</h1><p>Fourteen days of what the wearable and the patient reported, lined up with dose timing.</p></div><div class="cols even"><div class="stack">'+t1+t3+'</div><div class="stack">'+t2+t4+'</div></div>';
+}
+function vOrders(){
+  const p=S.patient,sent=S.instructions.filter(i=>i.sent).sort((a,b)=>b.date-a.date),ord=S.followups.filter(f=>f.ordered);
+  return '<div class="page-head"><h1>Send to patient</h1><p>Instructions and follow-ups go straight into '+esc(p.first)+'\'s care plan and schedule. He sees them on his next visit to the app.</p></div>'+
+  '<div class="cols even"><div class="stack">'+
+    panel('New instruction','Appears under Care plan','<div class="field"><label class="label" for="inCat">Category</label><select id="inCat"><option>Medication</option><option>Movement</option><option>Safety</option><option>Tests</option><option>General</option></select></div><div class="field"><label class="label" for="inText">Instruction in plain words</label><textarea id="inText" placeholder="For example: Take the 15:00 dose with a snack. Call the clinic if tremor is worse after two days."></textarea></div><div class="row">'+btn('Send instruction','sendInstr',null,'primary')+'</div>')+
+    panel('Sent this session','',sent.length?'<ul class="list">'+sent.map(i=>'<li><div class="li-head"><span>'+pill(i.cat,'info')+'</span><span class="muted small">'+fT(i.date)+'</span></div><p>'+esc(i.text)+'</p></li>').join('')+'</ul>':'<p class="muted">Nothing sent yet.</p>')+
+  '</div><div class="stack">'+
+    panel('Order a follow-up','Appears under Follow-ups','<div class="field"><label class="label" for="fuType">Type</label><select id="fuType"><option value="appt">Appointment</option><option value="test">Test</option></select></div><div class="field"><label class="label" for="fuTitle">What</label><input type="text" id="fuTitle" placeholder="For example: Physiotherapy session"></div><div class="field"><label class="label" for="fuDays">In how many days</label><input type="number" id="fuDays" min="1" max="60" value="3"></div><div class="row">'+btn('Order follow-up','orderFu',null,'primary')+'</div>')+
+    panel('Open follow-up gaps',gaps().length+' open',gaps().length?'<ul class="list">'+gaps().map(f=>'<li><div class="fu"><div><b>'+esc(f.title)+'</b><br><span class="muted small">'+esc(gapText(f))+'</span></div><div class="row">'+btn('Rebook in 3 days','rebook','data-id="'+f.id+'"')+(f.type==='test'?btn('Mark done','teamDone','data-id="'+f.id+'"'):'')+'</div></div></li>').join('')+'</ul>':'<p class="muted">No gaps.</p>')+
+  '</div></div>';
+}
+function vRules(){
+  const R=S.rules,p=S.patient;
+  const row=(k,name,desc,unit)=>'<tr><td><b>'+name+'</b><br><span class="muted small">'+desc+'</span></td><td><label class="switch"><input type="checkbox" data-ruleon="'+k+'"'+(R[k].on?' checked':'')+' aria-label="Rule on"> On</label></td><td>'+(unit?'<div class="row"><input type="number" class="mono" style="width:76px" data-rule="'+k+'" value="'+R[k].p+'" min="0" aria-label="Threshold"> <span class="muted small">'+unit+'</span></div>':'<span class="muted small">No threshold</span>')+'</td></tr>';
+  const log=S.audit.map(a=>'<li><time>'+fT(a.ts)+'</time><span><b>'+esc(a.who)+'</b> '+esc(a.what)+'</span></li>').join('');
+  return '<div class="page-head"><h1>Rules and access</h1><p>The predefined warning signs that put a patient in your queue, and who has looked at the data.</p></div>'+
+  '<div class="cols"><div class="stack">'+
+    panel('Escalation rules','Change a threshold, then press Enter','<div class="scroll-x"><table class="t"><thead><tr><th>Rule</th><th>State</th><th>Threshold</th></tr></thead><tbody>'+
+      row('missed','Missed levodopa doses','Doses not logged in the last 3 days','doses')+
+      row('rise','Tremor trend','Seven-day tremor index against the week before','% rise')+
+      row('off','Off-time','Reported off-time every day for 3 days','h or more')+
+      row('gap','Follow-up gap','Overdue test, missed appointment or reschedule request',null)+
+      '<tr><td><b>Confirmed fall</b><br><span class="muted small">Wearable confirms free-fall, impact and 3 s down</span></td><td>'+pill('Always on','info')+'</td><td><span class="muted small">Urgent</span></td></tr><tr><td><b>Patient reports a warning sign</b><br><span class="muted small">Chosen from a fixed list in the daily check-in</span></td><td>'+pill('Always on','info')+'</td><td><span class="muted small">Urgent or review</span></td></tr></tbody></table></div>')+
+    panel('What '+esc(p.first)+' shares with you','He controls this','<ul class="list">'+CATS.map(c=>'<li><div class="li-head"><span>'+esc(c.t)+'</span>'+(S.consent.care[c.id]?pill('Shared','ok'):pill('Not shared','warn'))+'</div></li>').join('')+'</ul>')+
+  '</div><div class="stack">'+panel('Access log','Every view of patient data is recorded','<ul class="audit">'+log+'</ul>')+'</div></div>';
+}
+
+/* ================= shell ================= */
+const TABS={
+  patient:[['today','Today'],['plan','Care plan'],['follow','Follow-ups'],['monitor','Sensor monitor'],['privacy','Privacy']],
+  caregiver:[['overview','Overview']],
+  care:[['overview','Overview'],['queue','Review queue'],['trends','Trends'],['orders','Send to patient'],['rules','Rules and access']]
+};
+const VIEWS={
+  'patient.today':vToday,'patient.plan':vPlan,'patient.follow':vFollow,'patient.monitor':vMonitor,'patient.privacy':vPrivacy,
+  'caregiver.overview':vCaregiver,
+  'care.overview':vTeamOverview,'care.queue':vQueue,'care.trends':vTrends,'care.orders':vOrders,'care.rules':vRules
+};
+const ROLES=[['patient','Patient'],['caregiver','Caregiver'],['care','Care team']];
+const WHO={patient:()=>S.patient.name,caregiver:()=>S.patient.caregiver,care:()=>S.patient.clinician};
+function badge(role,tab){
+  let n=0;
+  if(role==='patient'&&tab==='follow')n=patientGaps().length;
+  if(role==='patient'&&tab==='plan')n=newInstr();
+  if(role==='care'&&tab==='queue')n=openFlags().length;
+  return n?'<span class="count">'+n+'</span>':'';
+}
+function paintShell(){
+  $('roles').innerHTML=ROLES.map(r=>{
+    let n=0;if(r[0]==='care')n=openFlags().length;if(r[0]==='caregiver'&&sim.alert&&shared('cg','sensor'))n=1;
+    return '<button data-act="role" data-v="'+r[0]+'" aria-pressed="'+(S.role===r[0])+'">'+r[1]+(n?'<span class="count">'+n+'</span>':'')+'</button>';
+  }).join('');
+  const tabs=TABS[S.role];
+  $('tabs').hidden=tabs.length<2;
+  $('tabs').innerHTML=tabs.map(t=>'<button data-act="tab" data-v="'+t[0]+'"'+(S.tab[S.role]===t[0]?' aria-current="page"':'')+'>'+t[1]+badge(S.role,t[0])+'</button>').join('');
+}
+function paintBanner(){
+  const b=$('banner'),f=S.falls[S.falls.length-1];
+  const ok=sim.alert&&f&&(S.role==='patient'||(S.role==='caregiver'&&shared('cg','sensor'))||(S.role==='care'&&shared('care','sensor')));
+  b.hidden=!ok;if(!ok){b.innerHTML='';return;}
+  const p=S.patient;
+  let h;
+  if(S.role==='patient')h='<div><strong>Fall detected</strong><div class="small">Your caregiver and care team have been alerted. Press the button if you are all right.</div></div>'+btn('I am OK','ack',null,'danger');
+  else if(S.role==='caregiver')h='<div><strong>'+esc(p.first)+' may have fallen at '+fT(f.ts)+'</strong><div class="small">Call '+esc(p.first)+' now. If he does not answer, go to him or call 112.</div></div>'+btn('I am on it','ack',null,'danger');
+  else h='<div><strong>Fall alert for '+esc(p.name)+'</strong><div class="small">Confirmed by the wearable at '+fT(f.ts)+'. It is in the review queue.</div></div>'+btn('Open review queue','tab','data-v="queue"','danger');
+  b.innerHTML=h;
+}
+let lastSig='';
+function sigNow(){return dosesOn(today()).map(r=>r.st).join()+'|'+S.flags.map(f=>f.key+f.status+(f.active?1:0)).join()+'|'+gaps().length+'|'+sim.alert;}
+function renderAll(){
+  paintShell();paintBanner();
+  const fn=VIEWS[S.role+'.'+S.tab[S.role]]||vToday;
+  $('view').innerHTML=fn();
+  document.body.classList.toggle('big',!!S.circ.smallPrint);
+  drawStatic();updateLive();setT('clk',fT(now())+(clockOff?' (demo)':''));
+  lastSig=sigNow();
+}
+function whoCan(){return S.role==='patient';}
+function onTick(){
+  updateLive();setT('clk',fT(now())+(clockOff?' (demo)':''));
+  if(++tickN%20===0)softRefresh();
+}
+let tickN=0;
+function softRefresh(){
+  const a=document.activeElement;
+  if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&$('view').contains(a))return;
+  evaluate();
+  if(sigNow()!==lastSig)renderAll();
+}
+function touch(){updateLive();}
+function onFallAlert(){
+  const ts=now(),f={id:'fall-'+ts,ts,ack:false,src:sim.live?'phone':'wearable'};
+  S.falls.push(f);
+  S.flags.push({key:'fall:'+ts,event:true,active:true,sev:'urgent',src:'sensor',title:'Fall detected by the wearable',why:'Free-fall and impact confirmed, patient stayed down 3 s. Waiting for a caregiver to acknowledge.',ts,status:'new'});
+  renderAll();
+}
+function ackFall(who){
+  if(!sim.alert)return;
+  const f=S.falls[S.falls.length-1];f.ack=true;f.ackBy=who;f.ackAt=now();
+  const m=Math.round((f.ackAt-f.ts)/60e3),fl=S.flags.find(x=>x.key==='fall:'+f.ts);
+  if(fl)fl.why='Free-fall and impact confirmed, patient stayed down 3 s. Acknowledged by '+who+(m<1?' within a minute.':' after '+m+' min.');
+  sim.alert=false;sim.buzzUntil=0;fs.state='IDLE';
+  slog('ok','Alert acknowledged by '+who+'. System mode back to NORMAL.');
+  renderAll();
+}
+function fillHours(){
+  const d=today();
+  for(let h=6;h<=Math.min(22,Math.floor(hoursNow())-1);h++)
+    if(d.hourly[h]==null)d.hourly[h]=+Math.max(0.5,ampOf(hoursSinceLev(T0+(h+0.5)*HR))*1.45+(Math.random()-0.5)*1.4).toFixed(1);
+}
+function resetDemo(){
+  clockOff=0;seed();hb.hr=-1;S.ciResult=null;editCi=false;
+  S.draft={state:'',mood:'',sleep:'',stiff:1,signs:[],note:''};
+  S.consent={care:{sensor:true,meds:true,checkins:true,follow:true},cg:{sensor:true,meds:true,checkins:false,follow:true}};
+  S.circ={livesAlone:true,stairs:true,eveningsOnly:true,hardTravel:true,smallPrint:false};
+  S.rules={missed:{on:true,p:3},rise:{on:true,p:30},off:{on:true,p:3},gap:{on:true,p:0}};
+  if(!sim.live){engineReset();syncAuto();warmUp();}
+  renderAll();toast('Demo reset to the starting story.');
+}
+
+/* ================= actions ================= */
+const TAB_LABEL={overview:'the worklist',queue:'the review queue',trends:'trends',orders:'the orders page',rules:'rules and access'};
+function noteAccess(){
+  if(S.role==='patient')return;
+  const who=WHO[S.role](),what='Opened '+(TAB_LABEL[S.tab[S.role]]||'the overview');
+  if(!S.audit.length||S.audit[0].who!==who||S.audit[0].what!==what)audit(who,what);
+}
+const A={
+  role(el){S.role=el.dataset.v;S.ciResult=null;noteAccess();renderAll();window.scrollTo(0,0);},
+  tab(el){
+    if(S.role==='care'&&!(el.dataset.v in {overview:1,queue:1,trends:1,orders:1,rules:1}))return;
+    S.tab[S.role]=el.dataset.v;S.ciResult=null;noteAccess();renderAll();
+    if(S.role==='patient'&&el.dataset.v==='plan'){S.instructions.forEach(i=>{i.isNew=false;});paintShell();}
+    window.scrollTo(0,0);
+  },
+  dose(el){
+    const m=MEDS.find(x=>x.id===el.dataset.id);
+    today().doses[m.id]={st:'taken',at:now()};
+    evaluate();renderAll();toast('Logged '+m.name+' at '+fT(now())+'.');
+  },
+  ciEdit(){const c=today().ci;S.draft={state:c.state,mood:c.mood,sleep:c.sleep==null?'':c.sleep,stiff:c.stiff,signs:c.signs.slice(),note:c.note};editCi=true;S.ciResult=null;renderAll();},
+  ciSubmit(){
+    const dr=S.draft;
+    if(!dr.state||!dr.mood){$('ciErr').hidden=false;return;}
+    const d=today(),signs=dr.signs.slice(),ts=now();
+    d.ci={state:dr.state,mood:+dr.mood,sleep:dr.sleep===''?null:+dr.sleep,stiff:+dr.stiff,offH:null,signs,note:dr.note.trim(),at:ts};
+    const urgent=signs.some(id=>(SIGNS.find(s=>s.id===id)||{}).u);
+    S.flags=S.flags.filter(f=>f.key!=='sign:'+d.off);
+    if(signs.length)S.flags.push({key:'sign:'+ts,event:true,active:true,sev:urgent?'urgent':'review',src:'check-in',title:'Patient reported: '+signs.map(signLabel).join('; '),why:d.ci.note?'Patient note: '+d.ci.note:'No note added.',ts,status:'new'});
+    S.ciResult={urgent,n:signs.length};editCi=false;
+    S.draft={state:'',mood:'',sleep:'',stiff:1,signs:[],note:''};
+    evaluate();renderAll();
+  },
+  fuReq(el){const f=S.followups.find(x=>x.id===el.dataset.id);f.status='requested';f.reqAt=now();evaluate();renderAll();toast('Request sent to your care team.');},
+  fuDone(el){const f=S.followups.find(x=>x.id===el.dataset.id);f.status='done';f.selfDone=true;evaluate();renderAll();toast('Marked as done. Your care team will see this.');},
+  ack(){ackFall(S.role==='patient'?S.patient.name+' (patient)':S.role==='caregiver'?S.patient.caregiver:'Care team');},
+  sc(el){startScenario(el.dataset.v);},
+  sound(){
+    sim.sound=!sim.sound;
+    if(sim.sound&&!actx){try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){sim.sound=false;}}
+    if(actx&&actx.state==='suspended'){try{actx.resume();}catch(e){}}
+    const b=$('bSound');if(b){b.textContent='Buzzer sound: '+(sim.sound?'on':'off');b.setAttribute('aria-pressed',String(sim.sound));}
+  },
+  srcLive(){startLive();},
+  srcSim(){if(sim.live)stopLive();},
+  blSave(){
+    const tok=$('bToken').value.trim(),host=$('bHost').value.trim().toLowerCase();
+    if(!/^[a-z0-9.-]+$/.test(host)){bl.state='err';bl.err='Server name can only contain letters, digits, dots and hyphens.';setT('blMsg',blMsg());return;}
+    bl.token=tok;bl.host=host;bl.state=tok?'wait':'off';
+    try{localStorage.setItem('pdm.token',tok);localStorage.setItem('pdm.host',host);}catch(e){}
+    if(tok){slog('info','Blynk token saved. Sending V0, V1 and V2 to '+host+'.');blynkSend(true);}else slog('info','Blynk token cleared.');
+    updateLive();
+  },
+  flagReview(el){
+    const f=S.flags.find(x=>x.key===el.dataset.k),n=$('note-'+el.dataset.k);
+    f.status='reviewed';f.note=n?n.value.trim():'';f.reviewedAt=now();
+    audit(S.patient.clinician,'Reviewed flag: '+f.title);renderAll();toast('Marked as reviewed.');
+  },
+  flagReopen(el){const f=S.flags.find(x=>x.key===el.dataset.k);f.status='new';renderAll();},
+  copySum(){
+    const t=$('sumTxt').textContent;audit(S.patient.clinician,'Copied the visit summary');
+    const done=()=>toast('Summary copied.');
+    const fb=()=>{const r=document.createRange();r.selectNodeContents($('sumTxt'));const s=getSelection();s.removeAllRanges();s.addRange(r);toast('Press Ctrl+C or Cmd+C to copy the selected summary.');};
+    try{navigator.clipboard.writeText(t).then(done,fb);}catch(e){fb();}
+  },
+  sendInstr(){
+    const t=$('inText').value.trim();
+    if(!t){toast('Write the instruction first.');return;}
+    S.instructions.push({id:'n'+(++S.seq),from:S.patient.clinician,date:now(),cat:$('inCat').value,text:t,isNew:true,sent:true});
+    audit(S.patient.clinician,'Sent an instruction to the patient');renderAll();toast('Sent. '+S.patient.first+' will see it under Care plan.');
+  },
+  orderFu(){
+    const t=$('fuTitle').value.trim(),n=Math.max(1,Math.min(60,parseInt($('fuDays').value,10)||3));
+    if(!t){toast('Say what the follow-up is.');return;}
+    S.followups.push({id:'o'+(++S.seq),type:$('fuType').value,title:t,who:'Ordered by '+S.patient.clinician,due:T0+n*DAY+10*HR,status:'scheduled',ordered:true});
+    audit(S.patient.clinician,'Ordered a follow-up: '+t);renderAll();toast('Added to '+S.patient.first+'\'s follow-ups.');
+  },
+  rebook(el){const f=S.followups.find(x=>x.id===el.dataset.id);f.status='scheduled';f.due=T0+3*DAY+10*HR;f.who=(f.who||'')+' (rebooked)';audit(S.patient.clinician,'Rebooked: '+f.title);evaluate();renderAll();toast('Rebooked for '+fD(f.due)+'.');},
+  teamDone(el){const f=S.followups.find(x=>x.id===el.dataset.id);f.status='done';audit(S.patient.clinician,'Marked done: '+f.title);evaluate();renderAll();},
+  adv(el){advanceClock(+el.dataset.v);fillHours();hb.hr=-1;syncAuto();evaluate();renderAll();toast('Demo clock moved to '+fT(now())+'.');},
+  fall(){
+    if(sim.live){toast('Switch to the simulator to trigger a demo fall.');return;}
+    if(sim.sc||fs.state!=='IDLE'){toast('A motion event is already running.');return;}
+    startScenario('fall');toast('Simulating a fall. The alert fires after about 4 seconds.');
+  },
+  reset(){resetDemo();}
+};
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act]');
+  if(!el||el.disabled)return;
+  const fn=A[el.dataset.act];if(fn)fn(el);
+});
+const SIMH={
+  thr(t){THR=parseFloat(t.value);setT('sThrV',THR.toFixed(1)+' °/s');setT('rThr',THR.toFixed(1));},
+  fmode(t){fallSoft=t.value==='soft';FALL.free=fallSoft?0.5:0.35;FALL.impact=fallSoft?1.8:2.5;FALL.gyro=fallSoft?60:120;slog('info',fallSoft?'Relaxed fall thresholds: free-fall below 0.5 g, impact above 1.8 g and 60 °/s.':'Fall thresholds set to the project report values.');},
+  tOn(t){sim.tremorOn=t.checked;},
+  tF(t){sim.f=parseFloat(t.value);setT('tFv',sim.f.toFixed(1)+' Hz');},
+  tA(t){sim.A=parseFloat(t.value);setT('tAv',Math.round(sim.A)+' °/s');},
+  auto(t){sim.auto=t.checked;for(const id of ['tOn','tF','tA'])if($(id))$(id).disabled=sim.auto;if(sim.auto)syncAuto();}
+};
+function onField(e){
+  const t=e.target,ch=e.type==='change';
+  if(t.dataset.d){
+    const k=t.dataset.d,dr=S.draft;
+    if(k==='sign'){const i=dr.signs.indexOf(t.value);if(t.checked&&i<0)dr.signs.push(t.value);if(!t.checked&&i>=0)dr.signs.splice(i,1);}
+    else{dr[k]=t.value;if(k==='stiff')setT('stiffV',t.value);}
+    const er=$('ciErr');if(er&&dr.state&&dr.mood)er.hidden=true;
+  }else if(t.dataset.consent&&ch){
+    const[who,cat]=t.dataset.consent.split('.');
+    S.consent[who][cat]=t.checked;
+    audit(S.patient.name,(t.checked?'Allowed ':'Stopped ')+(who==='care'?'the care team':S.patient.cgFirst)+' to see '+CATS.find(c=>c.id===cat).t.toLowerCase());
+    renderAll();toast(t.checked?'Sharing turned on.':'Sharing turned off.');
+  }else if(t.dataset.circ&&ch){S.circ[t.dataset.circ]=t.checked;renderAll();}
+  else if(t.dataset.ruleon&&ch){S.rules[t.dataset.ruleon].on=t.checked;evaluate();audit(S.patient.clinician,'Changed rule: '+t.dataset.ruleon);renderAll();}
+  else if(t.dataset.rule&&ch){const v=parseFloat(t.value);if(!isNaN(v)&&v>=0){S.rules[t.dataset.rule].p=v;evaluate();audit(S.patient.clinician,'Changed a rule threshold');renderAll();}}
+  else if(t.dataset.sim){const fn=SIMH[t.dataset.sim];if(fn)fn(t);}
+}
+document.addEventListener('input',onField);
+document.addEventListener('change',onField);
+
+/* ================= boot ================= */
+let last=performance.now(),colTick=0,rsz=0;
+function loop(now2){
+  const dt=Math.min(now2-last,250);last=now2;
+  sim.carry+=dt;
+  while(sim.carry>=10){sim.carry-=10;step();}
+  if(colTick--<=0){readColors();colTick=30;}
+  if($('cGyro')){drawGyro();drawSpec();drawAcc();drawTrend();}
+  requestAnimationFrame(loop);
+}
+window.addEventListener('resize',()=>{clearTimeout(rsz);rsz=setTimeout(drawStatic,120);});
+seed();syncAuto();warmUp();syncT=new Date();
+slog('info','Monitor started in simulator mode. Tremor follows the timing of the last levodopa dose.');
+slog('info',bl.token?'Blynk token found.':'Blynk not configured.');
+readColors();
+renderAll();
+requestAnimationFrame(t=>{last=t;loop(t);});
+})();
+</script>
+
+</body></html>
